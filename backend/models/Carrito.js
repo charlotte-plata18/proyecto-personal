@@ -1,7 +1,7 @@
 /**
- * MODE SUBCAREGORIA
- * define la tabla SubCategoria en la base de datos
- * almacena las Subcategorias principales de los productos
+ * MODE CAREGORIA
+ * define la tabla Carrito en la base de datos
+ * almacena los productos que cada usuario ha agregado a su carrito
  */
 
 //importar DataTypes de sequelize
@@ -9,99 +9,107 @@ const { DataTypes } = require('sequelize');
 
 //importae instancia de sequelize
 const { sequelize } = require('../config/database');
-const { before } = require('node:test');
+const { table } = require('console');
 
  /**
-  * Definir el modelo de la Subcategoria
+  * Definir el modelo de la Carrito
   */
-const Categoria = sequelize.define('Subcategoria', {
+const Carrito = sequelize.define('Carrito', {
     //Campos de la tabla
     //Id Identificador unico (PRYMARY KEY)
     id: {
         type: DataTypes.INTEGER, 
         primaryKey: true, 
-        uautoIncrement: true, 
+        autoIncrement: true, 
         allowNull: false 
     },
 
-    nombre: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-        unique: {
-            msg: 'Ya existe una subcategoria con ese nombre'
-        },
-        validate: {
-            notEmpty: {
-                msg: 'El nombre de la subcategoria no puede estar vacio  '
-            },
-            len: {
-                args: [2, 100],
-                msg: 'El nombre debe tener entre 2y 100 caracteres'
-            }
-                
-        }
-    },
-
-    /**
-     * Descripcion de la subcategoria 
-     */
-    desripcion: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    },
-
-    /**
-     * categoriaId - ID de la categoria a la que pertenece (FOREIGNKEY)
-     * Esta es la relacion con la tabla categoria
-     */
-    categoriaId: {
+    // UsuarioId ID del usuario dueño del carrito
+    usuarioId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'categorias', // nombr de la tabla relacionada
-            Key: 'id' // campo de la tabla relacionada
+            model: 'Usuarios',
+            key: 'id'
         },
-        onUpdate: 'CASCADE', // Si se actualiza el id, actualizar aca 
-        // tambien
-        onDelete: 'CASCADE',// si se elimina la categoria eliminar de   
-        // las subcategoria
-        validate: {
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE', //si se elimina el usuario se elimina su carrito
+        validate:{
             notNull: {
-                msg: 'Debe selecionar una categoria'
+                msg: 'debe especificar usuario'
             }
         }
     },
 
-    /**
-     * activo estado de la subcategoria
-     * si es false los productos de esta subcategoria se ocultan
-     */
-    activo:{
-        type: DataTypes.BOOLEAN,
+    // ProductoId ID del producto que se agrega al carrito
+    productoId: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: true
+        references: {
+            model: 'Productos',
+            key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE', // se elimina el producto se elimina del carrito
+        validate:{
+            notNull: {
+                msg: 'Debe especificar producto'
+            }
+        }
+    },
+
+    // Cantidad del producto en el carrito
+    cantidad: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        delfaultvalue: 1,
+        validate:{
+            isInt: {
+                msg: 'La cantidad debe ser un numero entero'
+            },
+            min: {
+                args: [1],
+                msg: 'La cantidad debe ser al menos 1'
+            }
+        }
+    },
+
+
+    /**
+     * Precio Unitario del producto al monento de agregar al carrito
+     * se guarda para mantener el precio aunque el producto cambie de precio
+     */
+    precioUnitario: {
+        type: DataTypes.DECIMAL(10,2),
+        allowNull: false,
+        validate :{
+            isDecimal: {
+                msg: 'El precio unitario debe ser un numero decimal valido'
+            },
+            min:{
+                args: [0],
+                msg: 'El precio no puede ser negativo'
+            }
+        }
     }
 }, {
     //Opciones del modelo
-    
-    tableName: 'subcategorias',
-    timestamps: true, // Agrega campos createdAt y updatedAt
-
-    /** 
-     * indice compuestos para optimizar busquedas
-     */
+    tableName: 'carritos',
+    timestamps: true,
+    //indices compuestos para optimizar busquedas
     indexes: [
         {
-            // indice para buscar subcategorias por categorias
-            fields: [ 'categoriaId']
+            //indice para buscar por usuario y producto
+            fields: ['usuarioId',]
         },
         {
-            // Indice compuesto: nombre unico por categoria
-            //permite que dos categorias direntes tengan subcategorias con el mismo nombre
+            //Indice compuesto: un usuario no puede tener el mismo producto
+            //duplicado
             unique: true,
-            fields :[ 'nombre', 'categoriaId'],
-            name: 'nombre_categoria_unique'
+            fields: ['usuarioId', 'productoId'],
+            name: 'usuario_producto_unico'
         }
+        
     ],
 
     /**
@@ -182,18 +190,5 @@ Subcategoria.prototype.contarproductos = async function() {
         where: {subcategoriaId: this.id}});
 
 };
-/**
- * Metodo para obtener la categoria padre
- * 
- * @returns { Promise<Categoria>} - categoria padre
- */
-
-Subcategoria.prototype.obtenerCategoria = async function () {
-    const Categoria = require ('./Categoria');
-    return await Categoria.findByPk(this.categoriaId)
 }
-
-
- 
-// exportar modelo Categoria 
-module.exports = Subcategoria;
+);
