@@ -44,7 +44,7 @@ const Producto = sequelize.define('Producto', {
     /**
      * Descripcion detallada del productp
      */
-    desripcion: {
+    descripcion: {
         type: DataTypes.TEXT,
         allowNull: true,
     },
