@@ -11,8 +11,7 @@
 const Categoria = require ('../models/Categoria');
 const Subcategoria = require ('../models/Subcategoria');
 const Producto = require ('../models/Producto');
-const { count } = require('console');
-const { errors } = require('undici-types');
+
 
 /**
  * obtener todas las categorias
