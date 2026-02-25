@@ -80,7 +80,7 @@ const getSubcategorias = async (req, res) => {
 
 /**
  * obtener todas las subcategorias por id
- * GET/ api/subcategoria/:id
+ * GET/ api/admin/subcategoria/:id
  * 
  * @param {Object} req request express
  * @param {Object} res response express
