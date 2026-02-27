@@ -305,7 +305,7 @@ const crearProducto = async (req, res) =>{
 /**
  * Actualiza Producto
  * PUT/ api/ admin/ productos/:id
- *
+ * body: {nombre, descripcion, categoriaId, subcategoriaId, precio, stock, activo}
  * @param {Object} req request express
  * @param {Object} res response express
  */
@@ -332,13 +332,60 @@ const actualizaProducto = async (req, res) =>{
             });
         }
         
-        // Actualizar categoria si se proporciona un nuevo categoriaId
-        if (subcategoriaId && subcategoriaId !== producto.subcategoriaId) {
-            const nuevaSubcategoria = await Subcategoria.findByPk(subcategoriaId);
-            if (!nuevaSubcategoria) {
+        // validacion si se cambia la categoria y sub categoria
+
+        if (categoriaId && categoriaId !== producto.categoriaId) {
+            const categoria = await Categoria.findByPk(categoriaId);
+            if (!categoria ||!categoria.activo) {
                 return res.status(400).json({
                     success:false,
-                    message:`La subcategoria con id ${subcategoriaId} no existe`,
+                    message:`Categoria invalida o inactiva`,
+                });
+            }
+        }
+
+        if (subcategoriaId && subcategoriaId !== producto.subcategoriaId) {
+            const subcategoria = await Subcategoria.findByPk(subcategoriaId);
+            if (!subcategoria ||!subcategoria.activo) {
+                return res.status(400).json({
+                    success:false,
+                    message:`Subcategoria invalida o inactiva`,
+                });
+            }
+
+            const catId = await categoriaId||producto.categoriaId;
+            if (!subcategoria.categoriaId !== parseInt(catId)) {
+                return res.status(400).json({
+                    success:false,
+                    message:`la subcategoria mo pertenece a la categoria seleccionada`,
+                });
+            };
+
+            //validar precio y stock
+            if (precio !== undefined && parseFloat(precio) < 0) {
+                return res.status(400).json({
+                    success:false,
+                    message: 'El precio debe ser mayor a 0'
+                });
+            }
+
+            //manjar imagen
+            const imagen = req.file ? req.file.filename : producto.imagen;
+            if (req.file ) {
+                if (producto.imagen) {
+                    const rutaImagenAnterior = path.join(__dirname, '../uploads', producto.imagen);
+                    try {
+                        await fs.unlink(rutaImagenAnterior);
+                    } catch (err) {
+                    console.error('Error al eliminar imagen anterior:', err);}
+            }
+            producto.imagen = req.file.filename;
+        }
+
+            if (stock !== undefined && parseInt(stock) < 0) {
+                return res.status(400).json({
+                    success:false,
+                    message: 'El stock no puede ser negativo'
                 });
             }
 
@@ -350,44 +397,35 @@ const actualizaProducto = async (req, res) =>{
             }
         };
 
-        // valdacion si se cambia el nombre que no exita la categoria con el mismo nombre
-        if (nombre && nombre !== producto.nombre) {
-            const subcategoriaFinal = subcategoriaId || producto.subcategoriaId; // usar el nuevo subcategoriaId si se proporciona, de lo contrario usar el existente
-            const productoConMismoNombre = await Producto.findOne({
-                where: {
-                    nombre,
-                    subcategoriaId: subcategoriaFinal
-                }
-            });
-
-            if (productoConMismoNombre) {
-                return res.status(400).json({
-                    success:false,
-                    message:`Ya existe un producto con el nombre "${nombre}" en la subcategoria ${subcategoriaFinal}`
-                });
-            }
-        }
-
         // Actualizar campos
-        if (nombre!==undefined) subcategoria.nombre = nombre;
-        if (descripcion!==undefined) subcategoria.descripcion = descripcion;
-        if (descripcion!==undefined) subcategoria.descripcion = descripcion;
-        if (categoriaId!==undefined) subcategoria.categoriaId = categoriaId;
-        if (activo!==undefined) subcategoria.activo = activo;
-
+        if (nombre!==undefined) producto.nombre = nombre;
+        if (descripcion!==undefined) producto.descripcion = descripcion;
+        if (categoriaId!==undefined) producto.categoriaId =  parseInt(categoriaId);
+        if (activo!==undefined) producto.activo = activo;
+        if (stock!==undefined) producto.stock = parseInt(stock);
+        if (precio!==undefined) producto.precio = parseFloat(precio);
+        if (subcategoriaId!==undefined) producto.subcategoriaId = parseInt(subcategoriaId);
         // guardar cambios
-        await subcategoria.save();
+        await producto.save();
 
         // respuesta exitosa
         res.json({
             success: true,
-            message: 'Subategoria actualizada exitosamente',
+            message: 'Producto actualizado exitosamente',
             data:{
-                subcategoria
+                producto
             }
         });
     }catch (error){
-        console.error('Error en actualizar subcategoria:', error);
+        console.error('Error en actualizar producto:', error);
+        if (req.file) {
+            const rutaImagen = path.join(__dirname, '../uploads', req.file.filename);
+            try {                
+                await fs.unlink(rutaImagen);
+            } catch (err) {
+                console.error('Error al eliminar imagen:', err);
+            }
+        }
 
         if(error.name === 'SequelizeValidationError'){
             return res.status(400).json({
@@ -398,86 +436,76 @@ const actualizaProducto = async (req, res) =>{
         }
         res.status(500).json({
             success:false,
-            message :'Error al actualizar subcategoria',
+            message :'Error al actualizar producto',
             error: error.message
         });
     }
 };
 
 /**
- * Activar/Desactivar subcategoria
- * PATCH/api/admin/subcategorias/:id/estado
- * 
- * Al desactivar una subcategoria se desactican todos los productos
+ * Activar/Desactivar producto
+ * PATCH/api/admin/produtos/:id/estado
+ *
  * 
  * @param {Object} req request Express
  * @param {Object} res response Express
  */
 
-const toggleSubcategoria = async (req, res) => {
+const toggleProducto = async (req, res) => {
     try{
         const {id} =req.params;
 
         
-        // Buscar Subcategoria
-        const subcategoria = await Subcategoria.findByPk(id);
+        // Buscar Producto
+        const producto = await Producto.findByPk(id);
 
-        if(!subcategoria) {
+        if(!producto) {
             return res.status(404).json ({
                 success: false,
-                message: 'subcategoria no encontrada'
+                message: 'Producto no encontrado'
             });
         }
-        //Alternaar estado activo
-        const nuevoEstado = !subcategoria.activo;
-        subcategoria.activo = nuevoEstado;
-
-        // Guardar cambios
-        await subcategoria.save();
-        //contar cuantos registros se afectaron
-
-        const productoAfectadas = await Producto.count ({where:{subcategoriaId:id}
-        });
+        producto.activo = !producto.activo;
+        await producto.save();
 
         //Respuesta exitosa
         res.json({
             success:true,
-            message: `Subcategoria ${nuevoEstado ? 'activada': 'desactivada'} exitosamente`,
+            message: `Producto ${producto.activo ? 'activado': 'desactivado'} exitosamente`,
             data:{
-                subcategoria,
-                productos: productoAfectadas
-
+                producto
             }
         });
+
     } catch (error){
-        console.error('Error en toggleSubcategoria:', error);
+        console.error('Error en toggleProducto:', error);
         res.status(500).json({
             success:false,
-            message:'Error al cambiar estado de subcategoria',
+            message:'Error al cambiar estado de producto',
             error: error.message
         });
     }
 };
 
 /**
- * Eliminar subcategoria
- * DELETE /api/admin/subcategoria/:id
+ * Eliminar producto    
+ * DELETE /api/admin/productos/:id
  * Solo permite eliminar productos relacionados
  * @param {Object} req request express
  * @param {Object} res response express
 */
 
-const eliminarSubcategoria = async (req, res) => {
+const eliminarProducto = async (req, res) => {
     try {
         const {id} = req.params;
 
-        //Buscar subcategoria
-        const subcategoria = await Subcategoria.findByPk(id);
+        //Buscar producto
+        const producto = await Producto.findByPk(id);
 
-        if (!subcategoria) {
+        if (!producto) {
             return res.status(404).json({
                 success: false,
-                message: 'Subcategoria no encontrada'
+                message: 'Producto no encontrado'
             });
         }
 
@@ -488,23 +516,23 @@ const eliminarSubcategoria = async (req, res) => {
          if (productos > 0) {
             return res.status(400).json({
                 success: false,
-                message: `No se puede eliminar la subcategoria por que tiene ${productos} 
-                productos asociados usa PATCH/api/admin/subcategoria/:id/ toogle para desactivarla en lugar de eliminarla`
+                message: `No se puede eliminar el producto por que tiene ${productos} 
+                productos asociados usa PATCH/api/admin/productos/:id/ toogle para desactivarlo en lugar de eliminarlo`
             });
          }
         
-        // Eliminar subcategoria
-            await subcategoria.destroy();
+        // Eliminar producto
+            await producto.destroy();
         // Respuesta exitosa
         res.json({
                 success: true,
-                message: 'Subcategoria eliminada exitosamente'
+                message: 'Producto eliminado exitosamente'
             });
         } catch (error){
-        console.error('Error al eliminar subcategoria:', error);
+        console.error('Error al eliminar producto:', error);
         res.status(500).json({
             success:false,
-            message: 'Error al eliminar subcategoria',
+            message: 'Error al eliminar producto',
             error: error.message
         });
 
@@ -607,4 +635,4 @@ module.exports = {
     toggleSubcategoria, 
     eliminarSubcategoria,
     getEstadisticaSubcategoria    
-};
+}
