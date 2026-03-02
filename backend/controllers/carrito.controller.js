@@ -326,3 +326,40 @@ const eliminarItemCarrito = async (req, res) => {
     }
 };
 
+/**
+ * vaciar todo el carrito
+ * DELETE /api/carrito/vaciar
+ * 
+ */
+const vaciarCarrito =async (req, res) => {
+    try{
+        //Eliminar todos los items del usuario
+        const itemsEliminados = await Carrito.destroy({
+            where:{ usuarioId: req.usuario.id}
+        });
+
+        res.json({
+            succes:true,
+            message: 'Carrito vaciado',
+            data: {
+                itemsEliminados
+            }
+        });
+    }catch (error){
+        console.error ('Error en elimivar vaciarCarrito',error);
+        return res.status(500).json({
+            succes:false,
+            message: 'Error al vaciar el carrito',
+            error: error.message
+        })
+    }
+};
+
+//Exportar controladores
+module.exports = {
+    getCarrito,
+    agregarAlCarrito,
+    actualizarItemCarrito,
+    eliminarItemCarrito,
+    vaciarCarrito
+}
