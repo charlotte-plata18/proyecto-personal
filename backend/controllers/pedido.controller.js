@@ -556,7 +556,7 @@ const getEstadisticasPedidos = async (req, res) =>{
         const totalPedidos = await Pedido.count();
 
         //pedido estado
-        const pedidosPorEstados = await Pedido.findAll({
+        const pedidosPorEstado = await Pedido.findAll({
             attributes:[ 
                 'estado',
                 [fn('COUNT', col('id')), ' cantidad'],
@@ -583,15 +583,36 @@ const getEstadisticasPedidos = async (req, res) =>{
             succes: true,
             message: 'Estadisticas obtenidas exitosamente',
             data:{
-                pedido,
+                totalpedido,
+                pedidosHoy,
+                ventasTotales: parseFloat(totalVentas || 0).toFixed(2),
+                pedidosPorEstado: pedidosPorEstado.map(p => ({
+                    estado: p.estado,
+                    cantidad: parseInt(p.getDataValue ('cantidad')),
+                    totalVentas: parseFloat(p.getDataValue('totalVentas') ||  0 ). toFixed(2)
+                }))
             }
-        })
+        });
     }catch(error){
         console.error('Error en getEstadisticasPedido:',error);
         res.status(500).json({
             succes:false,
-            message: 'Error al obtener las estadisticas del pedido',
+            message: 'Error al obtener las estadisticas ',
             error:message.error
         });
     }
 }
+
+//Exportar controladore
+module.exports = {
+    //cliente
+    crearPedido,
+    getMisPedidos,
+    getPedidoById,
+    cancelarPedido,
+
+    //admid
+    getAllPedidos,
+    actualizarEstadoPedido,
+    getEstadisticasPedidos
+};
