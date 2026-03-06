@@ -209,11 +209,30 @@ const getMe = async (req, res) => {
             attributes: {exclude: ['password']}
         });
 
-        if
-    }catch(error){
+        if(!usuario){
+            return res.status(404).json({
+                success:false,
+                message:'usuario no encontrado'
+            })
 
+        }
+
+        //respuesta exitosa 
+        res.json({
+            success: true,
+            data:{
+                usuario
+            }
+        });
+    }catch(error){
+        console.error('Eror en getMe', error)
+        res.status(500).json({
+            success:false,
+            message:'Error al obtener perfil',
+            error: error.message
+        });
     }
-}
+};
 
 
 /**
