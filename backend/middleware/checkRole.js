@@ -190,7 +190,7 @@ const esAdminOAuxiliar = (req, res, next) => {
  * bloque el acceso a operaciones como eliminar
  */
 
-const soloAdminis = (req, res, next) => {
+const soloAdiministrador = (req, res, next) => {
     try{
         //veriricar que exista req.usuario ( viene de la autenticacion)
         if(!req.usuario){
@@ -227,5 +227,5 @@ module.exports = {
     tieneRol,
     esPropioUsuarioOAdmin,
     esAdminOAuxiliar,
-    soloAdminis
+    soloAdiministrador
 };
