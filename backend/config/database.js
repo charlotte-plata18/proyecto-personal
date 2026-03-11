@@ -1,14 +1,15 @@
 //** Configuración de la base de datos */
 
 //importar Sequelize
-const { Sequelize } = require('sequelize');
+const { Sequelize } = require('sequelize');  // permite trabajar  directamente con la 
+// base de datos con el lenguaje js
 
 //importar dotenv para cargar variables de entorno
-require('dotenv').config();
+require('dotenv').config(); // importa el modelo directamente con la base de datos con js
 
 //crear instacias de secualize
-const sequelize = new Sequelize(
-    process.env.DB_NAME, 
+const Sequelize = new Sequelize(
+    process.env.DB_NAME,  //  al utilizar 'process.env' significa que trabajamos con las variables de entorno
     process.env.DB_USER,
     process.env.DB_PASSWORD, 
     {
@@ -19,7 +20,7 @@ const sequelize = new Sequelize(
         //configuraciones de pool de conexiones
         //mantiene las conexiones abiertas para mejorar el rendimiento
         pool: {
-            max: 5,
+            max: 5, // solo por que es local pero si es para mas manejo se sube a 1000
             min: 0,
             acquire: 30000, 
             idle: 10000 
@@ -93,7 +94,7 @@ const syncDatabase = async () => async (forse =false, alter = false) => {
 
 //exportar la instancia de sequelize y las funciones 
 MediaSourceHandle.exports = {
-    sequelize,
+    Sequelize,
     testConnection,
     syncDatabase
 };

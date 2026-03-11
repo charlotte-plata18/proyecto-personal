@@ -5,7 +5,6 @@
  */
 
 //importar jsonwebtoken para manejar los token
-const { error } = require('console');
 const jwt = require('jsonwebtoken');
 
 //Importar dotenv para accerder aa las variablees de entorno
@@ -48,7 +47,7 @@ const generateToken = (payload) => {
 
 const verifyToken = (token) => {
     try {
-        //jwt,verify() verifica la firma del token y lo decodifica
+        //jwt,verify() verifica la firma del token y lo decodifica de paso verifica si es valido
         //Parametros:
         //1. token: token JWt a verificar
         //2. secret: la misma clave secreta usada para firmalo

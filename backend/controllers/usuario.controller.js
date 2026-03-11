@@ -11,7 +11,6 @@
 const Usuario = require ('../models/Usuario');
 
 
-
 /**
  * obtener todas los usuarios
  * GET/api/usuariros
@@ -28,7 +27,7 @@ const getUsuarios   = async (req, res) => {
         const {rol, activo, buscar, pagina = 1, limite = 10 }= req.query;
 
         //Construir los filtros
-        const where = {}
+        const where = {}; // una array tiene dos condiciones por rol o por activo
         if(rol) where.rol = rol;
         if (activo !== undefined) where.activo = activo === 'true';
 
@@ -37,7 +36,7 @@ const getUsuarios   = async (req, res) => {
             const {Op} = require('sequelize');
             where[Op.or] = [
                 {nombre: { [Op.like]: `%${buscar}%`}},
-                {apellido: { [Op.like]: `%${buscar}%`}},
+                {apellido: { [Op.like]: `%${buscar}%`}}, //OP.like lo va autocompletando
                 {email: { [Op.like]: `%${buscar}%`}},
             ];
         }
@@ -130,7 +129,7 @@ const getUsuarioById = async (req, res) => {
 const crearUsuario = async (req, res) =>{
     try{
 
-        const {nombre, apellido, email, password, rol, telefono, direccion} = res.body;
+        const {nombre, apellido, email, password, rol, telefono, direccion} = req.body;
         if(!nombre || !apellido  || !email || !password || !rol) {
             return res.status(400).json({
                 success:false,
@@ -170,7 +169,7 @@ const crearUsuario = async (req, res) =>{
             success:true,
             message: ' Usuario creado exitosamente',
             data:{
-                usuario:nuevoUsuario.tojson // convertir en Json para excluir campos sencibles
+                usuario:nuevoUsuario.tojson() // convertir en Json para excluir campos sensibles y es el formato para las api rest
             }
         });
 
@@ -216,7 +215,7 @@ const actualizaUsuario = async (req, res) =>{
         }
         
         // validacion rol si se proporciona
-        if (rol && !['cliente', 'auxiliar', 'administrador'].includes(rol)){
+        if (rol && !['cliente', 'administrador'].includes(rol)){
             return res.status(400).json({
                 success:false,
                 message:`rol invalido`

@@ -13,7 +13,7 @@ const Categoria = require ('../models/Categoria');
 const Subcategoria = require ('../models/Subcategoria');
 
 //importar path y fs para manejo de imagenes
-const path = require('path');
+const path = require('path'); // rutas de las carpetas 
 const fs = require('fs');
 
 
@@ -29,16 +29,17 @@ const fs = require('fs');
  * @param {Object} res response express
  */
 
-const getProductos = async (req, res) => {
+const getProductos = async (req, res) => { // get significa consultar /traer
     try {
         const {
-            subcategoriaId, 
             categoriaId,
+            subcategoriaId, 
             activo, 
             conStock,
             buscar,
             pagina = 1,
-            limite = 10 
+            limite = 100 // limita la paguina con los prdutos que contiene
+
         }= req.query;
 
         // construir filtros de consulta
@@ -47,9 +48,20 @@ const getProductos = async (req, res) => {
         if (subcategoriaId) where.subcategoriaId = subcategoriaId;
         if (activo !== undefined) where.activo = activo === 'true';
         if (conStock === 'true') where.stock = {[require('sequelize').Op.gt]: 0};
+        if (buscar){
+            const {Op} = require ('sequelize');
+            //Op.or busca por nombre o descripcion
+            //OP.like equivale a un like de sql con comodines para buscar considenciaas parciales
+            where [Op.or] = [
+                { nombre: {[Op.like]: `%${buscar}`}},
+                { descripcion: {[Op.like]: `%${buscar}`}}, // esto ayuda a filtrar lo que uno va buscando
+
+            ];
+        }
 
         // paginacion
-        const offset = (parseInt(pagina) - 1) * parseInt(limite);
+        const offset = (parseInt(pagina) - 1) * parseInt(limite); // por pagina le va contado los registros y le va menter el
+        // limite
         
         // Opciones de consulta
         const opciones = {
@@ -71,6 +83,7 @@ const getProductos = async (req, res) => {
             order: [['nombre', 'ASC']]
         };
 
+        // obtener producto y total
         const {count, rows: productos} = await Producto.findAndCountAll(opciones);
 
         // respuesta exitosa
@@ -110,7 +123,7 @@ const getProductoById = async (req, res) => {
         const {id}= req.params;
         
         // Buscar prductos con relacion 
-        const producto  = await Producto.findByPk (id,{
+        const producto  = await Producto.findByPk (id,{ 
             include:[
                 {
                     model: Categoria,
@@ -159,7 +172,7 @@ const getProductoById = async (req, res) => {
  * @param {Object} res response express
  */
 
-const crearProducto = async (req, res) =>{
+const crearProducto = async (req, res) =>{ // req = recoje la informacion y res =
     try {
 
         const {
@@ -232,12 +245,14 @@ const crearProducto = async (req, res) =>{
                 message: 'El precio no puede ser negativo'
             });
         }
-        if (parseIntstock < 0) {
+        if (parseInt(stock) < 0) {
             return res.status(400).json({
                 success:false,
                 message: 'El stock no puede ser negativo'
             });
-    }
+        }
+        // obtener image
+        const imagen = req.file ? req.file.filename : null;
 
         // crear producto
         const nuevoProducto = await Producto.create({
@@ -278,7 +293,7 @@ const crearProducto = async (req, res) =>{
 
         // si hubo un error eliminar imagen si se subio una imagen
         if (req.file) {
-            const imagenPath = path.join(__dirname, '../uploads', req.file.filename);
+            const rutaImagen = path.join(__dirname, '../uploads', req.file.filename);
             try {
                 await fs.unlink(rutaImagen);
             } catch (err) {
@@ -316,7 +331,7 @@ const actualizaProducto = async (req, res) =>{
         const {
             nombre, 
             descripcion,
-            categoriaId, 
+            categoriaId,
             activo,
             stock,
             precio
@@ -370,7 +385,6 @@ const actualizaProducto = async (req, res) =>{
             }
 
             //manjar imagen
-            const imagen = req.file ? req.file.filename : producto.imagen;
             if (req.file ) {
                 if (producto.imagen) {
                     const rutaImagenAnterior = path.join(__dirname, '../uploads', producto.imagen);
@@ -465,7 +479,7 @@ const toggleProducto = async (req, res) => {
                 message: 'Producto no encontrado'
             });
         }
-        producto.activo = !producto.activo;
+        producto.activo = !producto.activo; 
         await producto.save();
 
         //Respuesta exitosa
@@ -524,9 +538,7 @@ const eliminarProducto = async (req, res) => {
             error: error.message
         });
     }
-
 };
-
 
     /**
      * Actualizar stock de un producto
@@ -549,8 +561,8 @@ const eliminarProducto = async (req, res) => {
                 });
             }
 
-            const cantidadNUm = parseInt (cantidad);
-            if (cantidadNUm < 0) {
+            const cantidadNum = parseInt (cantidad);
+            if (cantidadNum < 0) {
                 return res.status(400).json({
                     success: false,
                     message: 'La cantidad no puede ser negativa'
@@ -569,19 +581,19 @@ const eliminarProducto = async (req, res) => {
         let nuevoStock;
         switch (operacion) {
             case 'aumentar':
-                nuevoStock = producto.aumentarStock(cantidadNUm)
+                nuevoStock = producto.aumentarStock(cantidadNum)
                 break;
             case 'reducir':
-                if (cantidadNUm > producto.stock) {
+                if (cantidadNum > producto.stock) {
                     return res.status(400).json({
                         success:false,
-                        message: `No hay sificiente stock, stock actual: ${producto.stock}`
+                        message: `No hay sificiente stock, Stock actual: ${producto.stock}`
                     });
                 }
-                nuevoStock = producto.reducirStock(cantidadNUm);
+                nuevoStock = producto.reducirStock(cantidadNum);
                 break;
             case 'establecer':
-                nuevoStock = cantidadNUm;
+                nuevoStock = cantidadNum;
                 break;
             default:
                 return res.status(400).json({
@@ -595,13 +607,15 @@ const eliminarProducto = async (req, res) => {
 
             res.json({
                 success:true,
-                message: `Stock ${operacion === 'aumentar' ? 'aumentado': operacion === 'reducir' ? 'reducido' : 'establecido'} exitosamente`,
+                message: `Stock ${operacion === 'aumentar' ? 
+                    'aumentado': operacion === 'reducir' ?
+                     'reducido' : 'establecido'} exitosamente`,
                 data:{
                     productoId: producto.id,
                     nombre: producto.nombre,
                     stockAnterior: operacion === 'establecer' ? null: 
-                    (operacion === 'aumentar' ? producto.stock - cantidadNUm :
-                    producto.stock + cantidadNUm),
+                    (operacion === 'aumentar' ? producto.stock - cantidadNum :
+                    producto.stock + cantidadNum),
                     stockActual: producto.stock 
                 }
             });

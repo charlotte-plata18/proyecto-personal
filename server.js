@@ -116,9 +116,8 @@ app.use('/api/admin', adminRoutes);
  
 
 // rutas clientes
-
+// incluye 
 const clientRoutes = require ('.routes/cliente.routes');
-const { stack } = require('./backend/routes/admin.routes');
 app.use('/api', clientRoutes);
 
 //Manejo de rutas no encontradas (404)

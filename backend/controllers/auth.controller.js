@@ -8,7 +8,7 @@
  */
 
 const Usuario = require ('../models/Usuario');
-const {generarToken} = require ('../config/jwt');
+const {generateToken} = require ('../config/jwt');
 
 
 /**
@@ -35,7 +35,7 @@ const register  = async (req, res) => {
             });
         }
         // validacion 2 verificar formato email 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // estructura de un codigo
         if(!emailRegex.test(email)){
             return res.status(400).json({
                 seccess:false,
@@ -52,7 +52,7 @@ const register  = async (req, res) => {
         }
 
     // validacion 4 verificar que el email no este registrado
-    const usuarioExistente = await Usuario.findOne({ where:{email}});
+    const usuarioExistente = await Usuario.findOne({ where:{email}}); // findOne = significa consulta especifica
     if(usuarioExistente){
         return res.status(400).json({
             seccess:false,
@@ -86,7 +86,7 @@ const register  = async (req, res) => {
             id:nuevoUsuario.Id,
             email:nuevoUsuario.email,
             rol:nuevoUsuario.rol
-        })
+        });
 
         // respuesta exitosa
         const usuarioRespuesta = nuevoUsuario.toJSON();
@@ -164,7 +164,7 @@ const login = async (req, res) => {
         }
 
         // Generar token JWT con datos basicos del usuario
-        const token = generarToken({
+        const token = generateToken({
             id:usuario.id,
             email: usuario.email,
             rol:usuario.rol
@@ -263,8 +263,6 @@ const updateMe = async (req, res) =>{
         if (telefono!==undefined) usuario.telefono= telefono;
         if (direccion!==undefined) usuario.direccion = direccion;
 
-    
-
         // guardar cambios
         await usuario.save();
 
@@ -324,7 +322,7 @@ const updateMe = async (req, res) =>{
             }
             // validacion 4  verificar que la contraseña actual se la correcta
             const passwordValida = await usuario.compararPassword(passwordActual);
-            if(!passwordActual){
+            if(!passwordValida){
                 return res.status(400).json({
                     success: false,
                     message: 'contraseña  actual incorrecta'

@@ -257,7 +257,7 @@ DetallePedido.crearDesdeCarrito = async function (pedidoId, itemsCarrito) {
  * @param {number} pedidoId - El ID del pedido para el cual se desea calcular el total del pedido
  * @returns {promise<number>} El total del pedido calculado a partir de los detalles del pedido asociados al ID del pedido proporcionado, o un error si no se encuentra ningún detalle de pedido para el ID de pedido proporcionado.
  */
-detallePedido.calcularTotalPedido = async function (pedidoId) {
+DetallePedido.calcularTotalPedido = async function (pedidoId) {
   const detalles = await this.findAll({ where: { pedidoId } });
 
   let total = 0;
@@ -286,7 +286,7 @@ carrito.obtenerCarritoUsuario = async function (usuarioId) {
  * @param {number} limit - El número máximo de productos más vendidos que se desea obtener en el resumen, este parámetro permite limitar la cantidad de productos que se incluyen en el resumen para enfocarse en los productos más populares.
  * @return {Promise<Array>} Un array de objetos que representan los productos más vendidos, cada objeto incluye el ID del producto, el nombre del producto y la cantidad total vendida, o un error si no se encuentra ningún detalle de pedido para calcular el resumen de productos más vendidos.
  */
-detallePedido.obtenerProductosMasVendidos = async function (limit = 10) {
+DetallePedido.obtenerProductosMasVendidos = async function (limit = 10) {
   const {sequelize } = require("../config/database");
   return await this.findAll({
     attributes: [

@@ -12,18 +12,18 @@ const multer = require('multer');
 const path = require('path');
 
 //importar fs para verificar/crear directorios
-const fs = require('fs');
-const { log } = require('console');
+const fs = require('fs'); // leer , escribir , fivesister(fs)
+
 
 //importar dotenv para variables de entorno
 require('dotenv').config();
 
 // Obtener la ruta donde se guarda los archivos 
-const uploadPath = process.env.UPLOAD_PATH || '/uploads ';
+const uploadPath = process.env.UPLOAD_PATH || './uploads ';
 
 //verificar si la carpeta uploads existe, si no crearla
-if (!fs.existsSync(uploadPath)) {
-    fs.mkdirSync(uploadPath, { recursive: true });
+if (!fs.existsSync(uploadPath)) {  //Sync es consoltar
+    fs.mkdirSync(uploadPath, { recursive: true }); //mkdir es el comando crear archivos
     console.log(`Carpeta ${uploadPath} creada `);
 }
 
@@ -40,7 +40,7 @@ const storage = multer.diskStorage({
      * @param {Object} file - Archivo que esta subiendo
      * @param {Function} cb - Callback que se llamara con (error, destination)
      */
-    destination: (req, file, cb) => {
+    destination: (req, file, cb) => { // AQUI ES DONDE BUSCA LA RUTA DEL ARCHIVO
         // cb (null, ruta) -> sin error, ruta = carpeta destino
         cb(null, uploadPath);
     },
@@ -52,7 +52,7 @@ const storage = multer.diskStorage({
      * @param {Object} file - Archivo que esta subiendo
      * @param {Function} cb - Callback que se llamara con (error, filename)
      */
-    filename: (req, file, cb) => {
+    filename: (req, file, cb) => { 
         //generara nombre unico usando timestamp + nombre original
         //Date.now() genera el timestamp unico
         //Path-extname() extrae la extencion del archivo (.jpg, .png, etc)
@@ -74,7 +74,7 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
     //Tiempos mime permitidos para imagenes
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']; // si se necesita otro formato se modifica aqui
 
     //verificar si el tipo de archivo esta en la lista permitida
     if (allowedTypes.includes(file .mimetype)) {
@@ -82,7 +82,7 @@ const fileFilter = (req, file, cb) => {
         cb(null, true); 
     } else {
         //cb(error) -> rechazar el archivo
-        cb(new Error('solo se permite imagenes (jpg, jpeg, png, gif)'), false);
+        cb(new Error('solo se permite imagenes (jpg, jpeg, png, gif)'), false); // aqui no por que esto solo es un error
     }
     
 };
@@ -92,7 +92,7 @@ const fileFilter = (req, file, cb) => {
  */
 
 const upload = multer({
-    storage: storage,
+    storage: storage, // aqui lo guarda + la descripcion + si necesita reitificarlo
     filefilter: fileFilter,
     limits:{
         //limite de tamaño dek archivo en bytes 
@@ -115,7 +115,7 @@ const deletefile = (filename) => {
         const filePath = path.join(uploadPath, filename);
 
         //Verficar si el archivp existe 
-        if (fs.existsSync(filePath)) {
+        if (fs.existsSync(filePath)) { //fs permite sacar informacion de las carpetas libremente
             //eliminar el archivo
             fs.unlinkSync(filePath);
             console.log(`Archivo eliminado: ${filePath}`);

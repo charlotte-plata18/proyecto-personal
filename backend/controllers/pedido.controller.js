@@ -12,9 +12,6 @@ const Producto = require ('../models/Producto');
 const Usuario = require ('../models/Usuario');
 const Categoria = require ('../models/Categoria');
 const Subcategoria = require ('../models/Subcategoria');
-const { totalmem } = require('os');
-const { parse } = require('path');
-const { count } = require('console');
 
 /**
  * crear pedido desde el carrito (checkout)
@@ -38,8 +35,8 @@ const crearPedido = async (req, res) => {
         }
 
         //Validacion 2: telefono requerido
-        if(!telefono || telefono.trim() === '') {
-            await t.rollback();
+        if(!telefono || telefono.trim() === '') { // el trim quita espacios de adelante y atras
+            await t.rollback(); // cancela la consulta
             return res.status(400).json({
                 succes: false,
                 message: 'Se requiere telefono'
@@ -58,11 +55,11 @@ const crearPedido = async (req, res) => {
 
         //obtener items del carrito
 
-        const carritoItems = await Carrito.findAll ({
-            where:{ usuarioId: req.user.usuarioId},
+        const itemsCarrito = await Carrito.findAll ({
+            where:{ usuarioId: req.usuario.usuarioId},
             include:[{
                 model:Producto,
-                as: 'producto',
+                as: 'producto', // es el llamado de la relacion no es un campo de la tabla
                 attributes: ['id', 'nombre', 'precio', 'stock', 'activo']
             }],
             transaction :t
@@ -97,7 +94,7 @@ const crearPedido = async (req, res) => {
                 continue;
             }
 
-            //Caluclar total
+            //Calcular total
             totalPedido += parseFloat(item.precioUnitario) * item.cantidad;
         }
 
@@ -113,7 +110,7 @@ const crearPedido = async (req, res) => {
 
         //crear pedido
         const pedido = await Pedido.create({
-            usuarioId: req.user.usuarioId,
+            usuarioId: req.usuario.id,
             total: totalPedido,
             estado: 'Pediente',
             direccionEnvio,
@@ -124,6 +121,7 @@ const crearPedido = async (req, res) => {
 
         //Crear  detalles del pedido y actualizar stock
         const detallesPedido = [];
+
         for (const item of itemsCarrito) {
             const producto = item.producto;
 
@@ -203,7 +201,6 @@ const crearPedido = async (req, res) => {
 const getMisPedidos = async (req, res ) =>{
     try{
         const {estado, pagina = 1, limite=10} = req.query;
-
         //filtros
         const where ={usuarioId: req.usuario.id };
         if (estado) where.estado = estado;
