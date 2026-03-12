@@ -20,7 +20,7 @@ const Subcategoria = sequelize.define('Subcategoria', {
     id: {
         type: DataTypes.INTEGER, 
         primaryKey: true, 
-        uautoIncrement: true, 
+        autoIncrement: true, 
         allowNull: false 
     },
 
@@ -134,7 +134,7 @@ const Subcategoria = sequelize.define('Subcategoria', {
          */
 
 
-        afterupdate: async (subcategoria, options) => {
+        afterUpdate: async (subcategoria, options) => {
             //Verificar si el campo activo cambio
             if (subcategoria.changed('activo') && !subcategoria.activo) {
                 console.log(`Desactivado subcategoria: ${subcategoria.nombre}`);

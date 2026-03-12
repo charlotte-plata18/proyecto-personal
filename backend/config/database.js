@@ -8,7 +8,7 @@ const { Sequelize } = require('sequelize');  // permite trabajar  directamente c
 require('dotenv').config(); // importa el modelo directamente con la base de datos con js
 
 //crear instacias de secualize
-const Sequelize = new Sequelize(
+const sequelize = new Sequelize(
     process.env.DB_NAME,  //  al utilizar 'process.env' significa que trabajamos con las variables de entorno
     process.env.DB_USER,
     process.env.DB_PASSWORD, 
@@ -71,7 +71,7 @@ const testConnection = async () => {
 /*@param {boolean} alter - Si es true, intenta alterar las tablas para que coincidan con los modelos (útil para producción) */
 
 
-const syncDatabase = async () => async (forse =false, alter = false) => {
+const syncDatabase = async (force = false, alter = false) => {
     try {
         //sincronizar toos los modelos con la base de datos
         await sequelize.sync({ force, alter});
@@ -93,8 +93,8 @@ const syncDatabase = async () => async (forse =false, alter = false) => {
 };
 
 //exportar la instancia de sequelize y las funciones 
-MediaSourceHandle.exports = {
-    Sequelize,
+module.exports = {
+    sequelize,
     testConnection,
     syncDatabase
 };

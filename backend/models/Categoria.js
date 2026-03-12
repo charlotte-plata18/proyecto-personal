@@ -20,7 +20,7 @@ const Categoria = sequelize.define('Categoria', {
     id: {
         type: DataTypes.INTEGER, 
         primaryKey: true, 
-        uautoIncrement: true, 
+        autoIncrement: true, 
         allowNull: false 
     },
 
@@ -74,7 +74,7 @@ const Categoria = sequelize.define('Categoria', {
          * afterUpdate: SE ejecuta despues de la actualizar una categoria
          * si se desactiva una categoria se desactiva todas sus subcategorias y productos
          */
-        afterupdate: async (categoria, options) => {
+        afterUpdate: async (categoria, options) => {
             //Verificar si el campo activo cambio
             if (categoria.changed('activo') && !categoria.activo) {
                 console.log(`Desactivado categoria: ${categoria.nombre}`);

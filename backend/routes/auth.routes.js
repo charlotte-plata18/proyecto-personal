@@ -5,7 +5,7 @@
  */
 
 // importar Router de express 
-const express = requiere('express');
+const express = require('express');
 const router = express.Router();
 
 // importar controladores de autenticacion

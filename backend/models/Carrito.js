@@ -148,7 +148,7 @@ const Carrito = sequelize.define('Carrito', {
          */
 
 
-        beforeupdate: async (itemCarrito) => {
+        beforeUpdate: async (itemCarrito) => {
 
             if (itemCarrito.changed('cantidad')) {
                 const Producto = require('./Producto');

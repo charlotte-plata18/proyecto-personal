@@ -111,14 +111,14 @@ Carrito.belongsTo(Usuario,{
  */
 
 Producto.hasMany(Carrito,{
-    foreignKey: 'ProductoId', // campo que conecta las tablas
+    foreignKey: 'productoId', // campo que conecta las tablas
     as: 'carrito', //Alias para relacion
     onDelete: 'CASCADE', // si se elimina un producto eliminar el carrito
     onUpdate: 'CASCADE' // si se actualiza un producto actualizar el Carrito
 });
 
 Carrito.belongsTo(Producto,{
-    foreignKey: 'ProductoId', // campo que conecta las tablas
+    foreignKey: 'productoId', // campo que conecta las tablas
     as: 'producto', //Alias para relacion
     onDelete: 'CASCADE', // si se elimina un producto eliminar el carrito
     onUpdate: 'CASCADE' // si se actualiza un producto actualizar el Carrito
@@ -189,14 +189,14 @@ DetallePedido.belongsTo(Producto,{
  * pedido y producto tiene un relacion muchos a muchos atravez de detalle de pedido
  */
 
-Pedido.hasMany(Producto,{
+Pedido.belongsToMany(Producto,{
     through: DetallePedido, // tabal intermedia
     foreignKey:'pedidoId', //campo que conecta las tablas
     otherKey: 'productoId', //campo que conecta las tablas
     as: 'productos', //Alias para relacion
 });
 
-Producto.hasMany(Pedido,{
+Producto.belongsToMany(Pedido,{
     through: DetallePedido, // tabal intermedia
     foreignKey:'productoId', //campo que conecta las tablas
     otherKey: 'pedidoId', //campo que conecta las tablas

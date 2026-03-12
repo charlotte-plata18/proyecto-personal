@@ -103,13 +103,14 @@ const DetallePedido = sequelize.define('DetallePedido', {
         validate:{
             isDecimal: {
                 msg: 'El subtotal debe ser un numero decimal valido'
-        },
-        min: {
-            args: [0],
-            msg: 'El subtotal no puede ser negativo'
+            },
+            min: {
+                args: [0],
+                msg: 'El subtotal no puede ser negativo'
+            }
         }
     }
-}, 
+}, {
     //Opciones del modelo
     tableName: 'detalle_pedidos',
     timestamps: false, // No necesitamos createdAt ni updatedAt para el detalle del pedido
@@ -125,8 +126,6 @@ const DetallePedido = sequelize.define('DetallePedido', {
             fields: ['productoId',]
         }, 
     ],
-
-
 
     /**
      * Hooks Acciones automaticas
@@ -147,7 +146,7 @@ const DetallePedido = sequelize.define('DetallePedido', {
          */
 
 
-        beforeupdate: (detalle) => {
+        beforeUpdate: (detalle) => {
 
             if (detalle.changed('precioUnitario') ||
             detalle.changed('cantidad')) {
@@ -173,7 +172,7 @@ DetallePedido.prototype.calcularSubtotal = function() {
  * @param {number} nuevaCantidad -  nueva cantidad 
  * @return {Promise} Item actualizado* 
 */
-Carrito.prototype.actualizarCatidad = async function (nuevaCantidad) {
+DetallePedido.prototype.actualizarCatidad = async function (nuevaCantidad) {
     const Producto = require('./Producto');
 
     const producto = await Producto.findByPk(this.productoId);

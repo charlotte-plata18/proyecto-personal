@@ -19,7 +19,7 @@ const path = require ( 'path');
 require ('dotenv').config();
 
 // Importar configuracion de la base de datos 
-const dbConfig = require ('./config/database');
+const { testConnection, syncDatabase, sequelize } = require ('./config/database');
 
 // Importar modelos y asociaciones 
 const {initAssociations} = require ('./models');
@@ -111,13 +111,13 @@ app.use('/api/auth', authRoutes);
 
 // Rutas del administrador 
 // requiren autenticacion y rol de administrador 
-const adminRoutes = require ('.routes/admin.routes');
+const adminRoutes = require ('./routes/admin.routes');
 app.use('/api/admin', adminRoutes);
  
 
 // rutas clientes
 // incluye 
-const clientRoutes = require ('.routes/cliente.routes');
+const clientRoutes = require ('./routes/cliente.routes');
 app.use('/api', clientRoutes);
 
 //Manejo de rutas no encontradas (404)
