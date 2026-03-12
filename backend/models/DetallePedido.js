@@ -25,6 +25,23 @@ const DetallePedido = sequelize.define('DetallePedido', {
         allowNull: false 
     },
 
+    // PedidoId ID del pedido al que pertenece el detalle del pedido
+    pedidoId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'Pedidos',
+            key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE', //si se elimina el pedido se eliminan los detalles asociados
+        validate:{
+            notEmpay:{
+                msg: 'Debe especificar el ID del pedido del detalle del pedido'
+            }
+        }
+    },
+
     // ProductoId ID del producto que se agrega al detalle del pedido
     productoId: {
         type: DataTypes.INTEGER,
@@ -36,7 +53,7 @@ const DetallePedido = sequelize.define('DetallePedido', {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT', //si se elimina el producto no se puede eliminar el detalle
         validate:{
-            notNull: {
+            notEmpty: {
                 msg: 'debe especificar UN Producto'
             }
         }
@@ -57,29 +74,6 @@ const DetallePedido = sequelize.define('DetallePedido', {
         }
     },
 
-
-    /**
-     * Precio Unitario -precio del producto al momento de agregar al detalle del pedido
-     * se guarda para mantener el precio aunque el producto cambie de precio
-     */
-        precioUnitario: {
-            type: DataTypes.DECIMAL(10,2),
-            allowNull: false,
-            validate :{
-                isDecimal: {
-                    msg: 'El precio unitario debe ser un numero decimal valido'
-                },
-                min:{
-                    args: [0],
-                    msg: 'El precio no puede ser negativo'
-                }
-            }
-        },
-        // Removed duplicate properties and fixed syntax
-    }, { // Removed duplicate properties and fixed syntax
-        // Opciones del modelo
-        tableName: 'carritos',
-        timestamps: true,
 
 
     /**
@@ -193,44 +187,6 @@ Carrito.prototype.actualizarCatidad = async function (nuevaCantidad) {
 
 };
 
-/**
- * Metodo para obtener el carrito completo de un usuario
- * incluye informacion de los producto
- * @param {number} usuarioId - Id del usuario
- * @returns {Promise<Array>} - Items del carrito con productos
- */
-
-Carrito.obtenerCarritoUsuario = async function (usuarioId) {
-    const Producto = require('./Producto');
-
-    return await this.findByPk({
-        where: {usuarioId},
-        include:[
-            {
-                model: Producto,
-                as: 'producto',
-            }
-        ],
-        orden: [['createdAt', 'DESC']]
-    });
-};
-
-/**
- * Metodo para calcular el total del carrito de un usuario
- * @param {number} usuarioId - Id del usuario
- * @returns {Promise<number>} - Total del carrito
- */
-Carrito.calcularTotalCarrito = async function (usuarioId) {
-    const Items = await this.findAll({
-        where: {usuarioId}
-    });
-
-    let total = 0;
-    for (const item of Items) {
-        total += item.calcularSubtotal();
-    }
-    return total;
-};
 
 /**
  * Metodo para crear deetalle del pedido desde el carrito
@@ -267,19 +223,6 @@ DetallePedido.calcularTotalPedido = async function (pedidoId) {
   return total;
 };
 
-carrito.obtenerCarritoUsuario = async function (usuarioId) {
-  const producto = require("./Producto");
-  return await carrito.findAll({
-    where: { usuarioId },
-    include: [
-      {
-        model: producto,
-        as: "producto",
-      },
-    ],
-    order: [["createdAt", "DESC"]], //Ordenar por fecha de creación, el item más reciente primero
-  });
-};
 
 /**
  * Metodo para obtener el ressumen de productos mas vendidos, este método consulta la base de datos para obtener un resumen de los productos más vendidos, incluyendo el ID del producto, el nombre del producto y la cantidad total vendida, esto permite obtener información valiosa sobre los productos más populares entre los usuarios y tomar decisiones informadas sobre el inventario y las estrategias de marketing.
@@ -299,14 +242,7 @@ DetallePedido.obtenerProductosMasVendidos = async function (limit = 10) {
   });
 };
 
-/**
- * Metodo para calcular el total del carrito de un usuario, este método busca todos los items de carrito asociados al ID del usuario proporcionado, calcula el subtotal de cada item (precio unitario * cantidad) y luego suma todos los subtotales para obtener el total del carrito, esto permite obtener el monto total que el usuario tendría que pagar por los productos agregados a su carrito de compras.
- * @param {number} usuarioId - El ID del usuario para el cual se desea calcular el total del carrito
- * @returns {Promise<number>} El total del carrito calculado a partir de los items de carrito asociados al usuario, o un error si no se encuentra ningún item de carrito para el usuario proporcionado.
- */
-carrito.calcularTotalCarrito = async function (usuarioId) {
-  const items = await carrito.findAll({ where: { usuarioId } });
-};
+
 
 //Exportar el modelo de carrito para ser utilizado en otras partes de la aplicación
-module.exports = carrito;
+module.exports = DetallePedido;

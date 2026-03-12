@@ -19,10 +19,10 @@ const path = require ( 'path');
 require ('dotenv').config();
 
 // Importar configuracion de la base de datos 
-const dbConfig = require ('./backend/config/database');
+const dbConfig = require ('./config/database');
 
 // Importar modelos y asociaciones 
-const {initAssociations} = require ('./backend/models');
+const {initAssociations} = require ('./models');
 
 // Importar seeders 
 const {runSeeders} = require ('./seeders/adminSeeder');
@@ -106,7 +106,7 @@ app.get('/api/health', (req, res) =>{
 // rutas de autenticacion
 // incluye registro login, perfil
 
-const authRoutes = require ('./backend/routes/auth.routes');
+const authRoutes = require ('./routes/auth.routes');
 app.use('/api/auth', authRoutes);
 
 // Rutas del administrador 

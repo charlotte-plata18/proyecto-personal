@@ -24,6 +24,7 @@ const esAdministrador = (req, res, next) => {
 
         // el usuario es administrador continuar
         next();
+        
     }catch(error){
         console.error('Error en middleware esAdministrador', error);
         return res.statu(500).json ({

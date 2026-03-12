@@ -14,7 +14,7 @@ const { before } = require('node:test');
  /**
   * Definir el modelo de la Subcategoria
   */
-const Categoria = sequelize.define('Subcategoria', {
+const Subcategoria = sequelize.define('Subcategoria', {
     //Campos de la tabla
     //Id Identificador unico (PRYMARY KEY)
     id: {

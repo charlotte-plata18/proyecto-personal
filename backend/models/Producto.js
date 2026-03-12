@@ -227,7 +227,7 @@ const Producto = sequelize.define('Producto', {
  * @returns {string|null} - numero de productos
  */
 Producto.prototype.contarproductos = function() {
-    if (this.imagen){
+    if (this.imagen){ 
          return null;
     }
 

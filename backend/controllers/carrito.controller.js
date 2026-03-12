@@ -7,7 +7,7 @@
 //importar modelos
 const Carrito= require ('../models/Carrito');
 const Producto = require('../models/Producto');
-const Usuario = require('../models/Usuario');
+const Categoria = require('../models/Categoria');
 const Subcategoria = require('../models/Subcategoria');
 
 /**
@@ -23,7 +23,7 @@ const Subcategoria = require('../models/Subcategoria');
         try{
             //obtener items del carrito de los productos relacionados
             const itemsCarrito = await Carrito.findAll({ 
-                where: { usuario: req.usuario._id },
+                where: { usuarioId: req.usuario._id },
             include: [
                 {
                     model: Producto,
@@ -48,9 +48,10 @@ const Subcategoria = require('../models/Subcategoria');
         });
 
         //calcular total del carrito
-        let totalCarrito = 0;
+        let total = 0;
         itemsCarrito.forEach(item => {
-            totalCarrito += item.cantidad * item.producto.precio;
+            total += parseFloat(item.precioUnitario) * item.cantidad;
+
         });
 
         //respuesta exitosa
@@ -62,7 +63,7 @@ const Subcategoria = require('../models/Subcategoria');
                     totalItems:itemsCarrito.length,
                     cantidadtotal: itemsCarrito.reduce
                     ((sum, item) => sum + item.cantidad, 0),
-                    totalCarrito: totalCarrito.toFixed
+                    total: total.toFixed(2)
                 }
             }
         });   
@@ -86,7 +87,7 @@ const Subcategoria = require('../models/Subcategoria');
 
 const agregarAlCarrito = async (req, res) =>{
     try{
-        const {productoId, cantidad=1} = req.body;
+        const {productoId, cantidad=1} = req.body; // body = tipo stript
 
         //Validacion 1: campos requeridos
         if(!productoId) {
@@ -105,8 +106,8 @@ const agregarAlCarrito = async (req, res) =>{
             });
         }
 
-        //Validacion3: Producto ecistente y esta activo
-        const producto = await Producto.findByPk (productoId);
+        //Validacion3: Producto existente y esta activo
+        const producto = await Producto.findByPk(productoId);
 
         if(!producto) {
             return res.status(404).json({
@@ -125,7 +126,7 @@ const agregarAlCarrito = async (req, res) =>{
         //Validacion 4: Varificar si ya existe el prodcuto en el carrito
         const itemExistente = await Carrito.findOne({
             where:{
-                usuarioId: res.usuario.id,
+                usuarioId: req.usuario.id,
                 productoId,
             }
         });
@@ -145,8 +146,8 @@ const agregarAlCarrito = async (req, res) =>{
             itemExistente.cantidad = nuevaCantidad;
             await itemExistente.save();
 
-            //Recargar producto 
-            await itemExistente.relod({
+            //Recargar producto         
+            await itemExistente.reload({
                 include:[{
                     model: Producto,
                     as: 'producto',
@@ -173,7 +174,7 @@ const agregarAlCarrito = async (req, res) =>{
 
         //crear un nuevo item en el carrito
         const nuevoItem = await Carrito.create({
-            usuarioId: res.usuario.id,
+            usuarioId: req.usuario.id,
             productoId,
             cantidad: cantidadNum,
             precioUnitario: producto.precio
@@ -236,7 +237,7 @@ const actualizarItemCarrito = async (req, res) => {
         const item = await Carrito.findOne({
             where:{
                 id,
-                usuarioId: res.usuario.id // solo puede modificar su carrito
+                usuarioId: req.usuario.id // solo puede modificar su carrito
             },
             include :[{
                 model: Producto,
@@ -290,13 +291,13 @@ const actualizarItemCarrito = async (req, res) => {
 
 const eliminarItemCarrito = async (req, res) => {
     try{
-        const {id} = req.param;
+        const {id} = req.params;
 
         //Buscar item
         const item = await Carrito.findOne({
             where:{
                 id,
-                usuarioId: res.usuario.id
+                usuarioId: req.usuario.id
             }
         });
 

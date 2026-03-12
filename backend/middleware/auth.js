@@ -39,7 +39,7 @@ const verificarAuth = async (req, res, next) => {
         //paso 2 verificar que el token oes valido 
         let decoded; // funcion para decodificar token
         try{
-            decoded = verificarToken (token);
+            decoded = verifyToken (token);
         }catch (error){
             return res.status(401).json({
                 succes:false,
@@ -49,7 +49,7 @@ const verificarAuth = async (req, res, next) => {
 
         // buscar el usuario de la base de datos
         const usuario = await Usuario.findById(decoded.id,{
-            attributes: {exclude: ['password']}
+            attributes: {exclude: ['password']} // no incluir la contraseña en la respuesta
         });
 
         if (!usuario){
@@ -66,7 +66,7 @@ const verificarAuth = async (req, res, next) => {
                 message: 'Usuario inactivo contacte al administrador'
             });
         }
-        //paso 5 agregar el usuario al objeto req para uso posterior
+        //paso 5 agregar el usuario al objeto req para uso posterior 
         // ahora en los controladores podemos acceder a req.usuario
 
         // continuar en el siguiente 
@@ -90,7 +90,7 @@ const verificarAuth = async (req, res, next) => {
  * es para rutas que no requieren autenticacion
  */
 
-const verificarAuthOpcional = async  (erq, res, next) =>{
+const verificarAuthOpcional = async  (req, res, next) =>{
     try{
         const authHeader = req.header.authorization;
 
