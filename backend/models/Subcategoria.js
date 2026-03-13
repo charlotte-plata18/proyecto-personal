@@ -9,7 +9,6 @@ const { DataTypes } = require('sequelize');
 
 //importae instancia de sequelize
 const { sequelize } = require('../config/database');
-const { before } = require('node:test');
 
  /**
   * Definir el modelo de la Subcategoria
@@ -117,7 +116,7 @@ const Subcategoria = sequelize.define('Subcategoria', {
             const Categoria = require ('./Categoria');
 
             // Buscar categoria padre
-            const categiria = await Categoria.findByPk (subcategoria.categoriaId);
+            const categoria = await Categoria.findByPk (subcategoria.categoriaId);
 
             if (!categoria) {
                 throw  new Error ( 'La categoria seleccionada noo existe');

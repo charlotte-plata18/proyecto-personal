@@ -29,7 +29,7 @@ const crearPedido = async (req, res) => {
         if(!direccionEnvio || direccionEnvio.trim() === '') {
             await t.rollback();
             return res.status(400).json({
-                succes: false,
+                success: false,
                 message: 'Se requiere dirrecion'
             });
         }
@@ -38,7 +38,7 @@ const crearPedido = async (req, res) => {
         if(!telefono || telefono.trim() === '') { // el trim quita espacios de adelante y atras
             await t.rollback(); // cancela la consulta
             return res.status(400).json({
-                succes: false,
+                success: false,
                 message: 'Se requiere telefono'
             });
         }
@@ -48,7 +48,7 @@ const crearPedido = async (req, res) => {
         if(!metodosValidos.includes(metodoPago)) {
             await t.rollback();
             return res.status(400).json({
-                succes: false,
+                success: false,
                 message: `metodo de pago invalido, opciones: ${metodosValidos.join(',')}`
             });
         }
@@ -56,7 +56,7 @@ const crearPedido = async (req, res) => {
         //obtener items del carrito
 
         const itemsCarrito = await Carrito.findAll ({
-            where:{ usuarioId: req.usuario.usuarioId},
+            where:{ usuarioId: req.usuario.id},
             include:[{
                 model:Producto,
                 as: 'producto', // es el llamado de la relacion no es un campo de la tabla
@@ -65,10 +65,10 @@ const crearPedido = async (req, res) => {
             transaction :t
         });
 
-        if (itemsCarrito.lenght === 0) {
+        if (itemsCarrito.length === 0) {
             await t.rollback ();
             return res.status(400).json({
-                succes: false,
+                success: false,
                 message:' El carrito esta vacio'
             })
         }
@@ -102,7 +102,7 @@ const crearPedido = async (req, res) => {
         if(erroresValidacion.length > 0){
             await t.rollback();
             return res.status(400).json ({
-                succes: false,
+                success: false,
                 message: 'Error en validacion de carrito',
                 errores: erroresValidacion
             });
@@ -172,7 +172,7 @@ const crearPedido = async (req, res) => {
 
         //respuesta exitosa
         res.status(201).json ({
-            succes:true,
+            success:true,
             message: "Pedido creado existosa",
             data:{
                 pedido
@@ -185,7 +185,7 @@ const crearPedido = async (req, res) => {
         await t.rollback();
         console.error ('Error en crearPedido',error);
         res.status(500).json({
-            succes: false,
+            success: false,
             message: 'Error al crear Pedido',
             error: error.message
         });
@@ -225,12 +225,12 @@ const getMisPedidos = async (req, res ) =>{
             ],
             limit: parseInt(limite),
             offset,
-            order: [['createAt', 'DESC']]
+            order: [['createdAt', 'DESC']]
         });
 
         //respuesta exitosa
         res.status(201).json({
-            succes: true,
+            success: true,
             data: {
                 pedidos,
                 paginacion:{
@@ -246,9 +246,9 @@ const getMisPedidos = async (req, res ) =>{
     } catch (error){
         console.error ('Error en getMisPedidos', error);
         res.status(500).json({
-            succes: false,
+            success: false,
             message: 'Error al obtener los  pedido ',
-            error: error.messagen
+            error: error.message
         });
     }
 };
@@ -303,14 +303,14 @@ const getPedidoById = async (req, res) =>{
 
         if(!pedido) {
             return res.status(404).json({
-                succes: false,
+                success: false,
                 message: 'pedido no encontrado'
             });
         }
 
         //respuesta exitosa
         res.json({
-            succes:true,
+            success:true,
             data:{
                 pedido,
             }
@@ -319,7 +319,7 @@ const getPedidoById = async (req, res) =>{
     }catch (error){
         console.error('Error en getPedidoById:', error);
         res.status(500).json({
-            succes:false,
+            success:false,
             message:'Pedido no encontrado',
             error: error.message
         });
@@ -351,7 +351,7 @@ const cancelarPedido = async (req,res) =>{
                 as: 'detalles',
                 include:[{
                     model:Producto,
-                    as: ' pedido',   
+                    as: 'producto',   
                 }]
             }],
             transaction: t
@@ -360,7 +360,7 @@ const cancelarPedido = async (req,res) =>{
         if(!pedido){
             await t.rollback();
             return res.status(404).json({
-                succes:false,
+                success:false,
                 message:'Pedido no encontrado'
             });
         }
@@ -369,13 +369,13 @@ const cancelarPedido = async (req,res) =>{
         if(pedido.estado !== 'pendiente'){
             await t.rollback();
             return res.status(404).json({
-                succes: false,
+                success: false,
                 message: `NO se puede cancelar un pedido en estado '${pedido.estado}'`
             });
         }
 
         // devolver stock de los productos
-        for(const detalle of pedido.detalle){
+        for(const detalle of pedido.detalles){
             const producto = detalle.producto;
             producto.stock += detalle.cantidad;
             await producto.save({transaction: t})
@@ -390,7 +390,7 @@ const cancelarPedido = async (req,res) =>{
 
         //respuesta exitosa
         res.status(201).json({
-            succes:true,
+            success:true,
             message: 'Pedido cancelado existosamente',
             data:{
                 pedido
@@ -402,7 +402,7 @@ const cancelarPedido = async (req,res) =>{
         await t.rollback();
         console.error('Error en cancelarPedido:', error);
         res.status(500).json({
-            succes: false,
+            success: false,
             message: ' Error al cancelar el pedido',
             error: error.message
         });
@@ -452,7 +452,7 @@ const getAllPedidos = async (req, res) =>{
 
         // respuesta exitosa
         res.status(201).json({
-            succes: true,
+            success: true,
             data:{
                 pedidos,
                 paginacion:{
@@ -467,7 +467,7 @@ const getAllPedidos = async (req, res) =>{
     }catch(error){
         console.error ('Error en getAllPedidos:', error);
         res.status(500).json({
-            succes: false,
+            success: false,
             message: "Error al obtener pedidos",
             error: error.message
         })
@@ -491,8 +491,8 @@ const actualizarEstadoPedido = async (req, res) =>{
         ];
         if(!estadosValidos.includes(estado)){
             return res.status(400).json({
-                succes: false,
-                message: `estado invalido, opciones: ${estadosValidos.json(',')}`
+                success: false,
+                message: `estado invalido, opciones: ${estadosValidos.join(',')}`
             });
         }
 
@@ -500,7 +500,7 @@ const actualizarEstadoPedido = async (req, res) =>{
         const pedido = await Pedido.findByPk(id);
         if(!pedido){
             return res.status(404).json({
-                succes: false,
+                success: false,
                 message: ' pedido no encontrado'
             });
         }
@@ -522,7 +522,7 @@ const actualizarEstadoPedido = async (req, res) =>{
 
         // Respuesta exitosa
         res.status(201).json({
-            succes: true,
+            success: true,
             message: 'Estado del pedido actualizado',
             data:{
                 pedido
@@ -533,9 +533,9 @@ const actualizarEstadoPedido = async (req, res) =>{
     } catch (error){
         console.error('Error en actualizarEstadoPedido:', error);
         res.status(500).json({
-            succes: false,
+            success: false,
             message: 'Error al actualizar el estado del pedido',
-            error: message.error
+            error: error.message
         });
     }
 };
@@ -577,10 +577,10 @@ const getEstadisticasPedidos = async (req, res) =>{
 
         // respuesta exitosa
         res.status(201).json({
-            succes: true,
+            success: true,
             message: 'Estadisticas obtenidas exitosamente',
             data:{
-                totalpedido,
+                totalPedidos,
                 pedidosHoy,
                 ventasTotales: parseFloat(totalVentas || 0).toFixed(2),
                 pedidosPorEstado: pedidosPorEstado.map(p => ({
@@ -593,9 +593,9 @@ const getEstadisticasPedidos = async (req, res) =>{
     }catch(error){
         console.error('Error en getEstadisticasPedido:',error);
         res.status(500).json({
-            succes:false,
+            success:false,
             message: 'Error al obtener las estadisticas ',
-            error:message.error
+            error:error.message
         });
     }
 }

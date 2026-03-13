@@ -41,7 +41,7 @@ const getCategorias = async (req, res) => {
         // incluir Subcategorias si se solicita
 
         if (IncluirSubcategorias === 'true'){
-            opciones.include == [{
+            opciones.include = [{
                 model: Subcategoria,
                 as: 'subcategorias', //campos del alias para la relacion
                 attributes: ['id','nombre','descripcion', 'activo'] // campos de incluir de la subcategoria
@@ -49,8 +49,7 @@ const getCategorias = async (req, res) => {
         }
 
         //Obtener categorias
-        const categorias = await Categoria.findAll
-        (opciones);
+        const categorias = await Categoria.findAll(opciones);
 
         // respuesta exitosa
         res.json({
@@ -109,8 +108,8 @@ const getCategoriasById = async (req, res) => {
 
         //agregar contador de productos
         const categoriaJSON = categoria.toJSON();
-        categoriaJSON.totalProductos = categoriaJSON.producto.length;
-        delete categoriaJSON.producto;// no enviar la lista completa solo el contador
+        categoriaJSON.totalProductos = categoriaJSON.productos.length;
+        delete categoriaJSON.productos;// no enviar la lista completa solo el contador
 
         //Respuesta exitosa
         res.json({
@@ -141,7 +140,7 @@ const getCategoriasById = async (req, res) => {
 const crearCategoria = async (req, res) =>{
     try{
 
-        const {nombre,descripcion} = res.body;
+        const {nombre,descripcion} = req.body;
         if(!nombre) {
             return res.status(400).json({
                 success:false,
@@ -150,7 +149,7 @@ const crearCategoria = async (req, res) =>{
 
         }
         // Validacion 2: categoria duplicada
-        const categoriaExistente = await categoria.findOne({where: (nombre)});
+        const categoriaExistente = await Categoria.findOne({where: {nombre}});
         if (categoriaExistente){
             return res.status(400).json({
                 success:false,
@@ -215,7 +214,7 @@ const actualizaCategoria = async (req, res) =>{
         
         // validacion 1 si se camabia el nombre verificar que no exista
         if (nombre && nombre !== categoria.nombre){
-            const categoriaConMismoNombre = await categoria.findOne({ where:{nombre}});
+            const categoriaConMismoNombre = await Categoria.findOne({ where:{nombre}});
             if ( categoriaConMismoNombre) {
                 return res.status(400).json({
                     success:false,
@@ -274,7 +273,7 @@ const toggleCategoria = async (req, res) => {
         const {id} =req.params;
 
         // Buscar categoria
-        const categoria = await Categoria.findByPk(Id);
+        const categoria = await Categoria.findByPk(id);
 
         if(!categoria) {
             return res.status(404).json ({
@@ -295,7 +294,7 @@ const toggleCategoria = async (req, res) => {
         Subcategoria.count ({where:{categoriaId:id}
         });
 
-        const productoAfectadas = await producto.count ({where:{categoriaId:id}
+        const productoAfectadas = await Producto.count ({where:{categoriaId:id}
         });
 
         //Respuesta exitosa

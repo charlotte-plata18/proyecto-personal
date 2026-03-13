@@ -76,7 +76,7 @@ const verifyToken = (token) => {
 
 const extractToken = (authHeader) => {
     //verificar que el header exitente y empieza con "Bearer "
-    if (authHeader && authHeader.startsWhith('Bearer ')) {
+    if (authHeader && authHeader.startsWith('Bearer ')) {
         //Extraer el token (quitar "Bearer ")
         return authHeader.substring(7);
 

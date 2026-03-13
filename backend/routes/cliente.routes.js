@@ -35,7 +35,7 @@ router.get('/catalogo/categorias/:id/subcategorias', catalogoController.getSubca
  
  // rutas de carrito
  //Get /api/ cliente/carrito
- router.get ('/carrito', carritoController.getCarrito);
+ router.get ('/cliente/carrito', verificarAuth, carritoController.getCarrito);
 
 
   //post /api/ cliente/carrito

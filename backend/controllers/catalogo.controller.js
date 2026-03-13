@@ -51,7 +51,7 @@ const getProductos = async (req, res) => {
 
         //Busqueda de texto
         if(buscar){
-            where [Op.or] =[
+            where[Op.or] =[
                 {nombre: {[Op.like]: `%${buscar}%`}},
                 {descripcion: {[Op.like]: `%${buscar}%`}}, // permite buscar por nombre o descripcion
             ];
@@ -88,20 +88,20 @@ const getProductos = async (req, res) => {
         
         // consulta de productos
 
-        const opciones = {count, rows: productos} = await Producto.findAndCountAll({
+        const {count, rows: productos} = await Producto.findAndCountAll({
             where,
             include:[
                 {
                     model: Categoria,
                     as: 'categoria',
                     attributes: ['id','nombre'], 
-                    where: {activo: trur}
+                    where: {activo: true}
                 },
                 {
                     model: Subcategoria,
                     as: 'subcategoria',
                     attributes: ['id','nombre'],
-                    where: {activo: trur}
+                    where: {activo: true}
                 }               
             ], 
             limit: parseInt(limite),
@@ -206,7 +206,7 @@ const getCategorias = async (req, res) => {
         const {Op}= require ('sequelize');
         
         // Buscar categoria activasa 
-        const categoria  = await Categoria.findOne ({
+        const categorias  = await Categoria.findAll ({
             where:{activo: true},
             attributes: ['id', 'nombre', 'descripcion'],
             order: [['nombre', 'ASC']]
@@ -274,7 +274,7 @@ const getSubcategoriasPorCategoria = async (req, res) => {
         }
         
         // Buscar subcategoria activas
-        const subcategorias  = await Subcategoria.findOne ({
+        const subcategorias  = await Subcategoria.findAll ({
             where:{
                 categoriaId: id,
                 activo: true
@@ -338,7 +338,7 @@ const getProductosDestacados = async (req, res) => {
         const {Op} = require ('sequelize');
 
         //Verificar que la categoria exista
-        const producto = await Producto.findAll({
+        const productos = await Producto.findAll({
             where:{
                 activo: true,
                 stock: {[Op.gt]: 0}

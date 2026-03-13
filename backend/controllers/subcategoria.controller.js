@@ -48,7 +48,7 @@ const getSubcategorias = async (req, res) => {
         // incluir categorias si se solicita
 
         if (incluirCategoria === 'true'){
-            opciones.include == [{
+            opciones.include = [{
                 model: Categoria,
                 as: 'categoria', //campos del alias para la relacion
                 attributes: ['id','nombre', 'activo'] // campos de incluir de la categoria
@@ -56,8 +56,7 @@ const getSubcategorias = async (req, res) => {
         };
 
         //Obtener subcategorias
-        const subcategorias = await Subcategoria.findAll
-        (opciones);
+        const subcategorias = await Subcategoria.findAll(opciones);
 
         // respuesta exitosa
         res.json({
@@ -169,12 +168,12 @@ const crearSubcategoria = async (req, res) =>{
         if(!categoria.activo) {
             return res.status(400).json({
                 success:false,
-                message: `La categoria con id ${categoriaId.nombre} esta  inactiva`
+                message: `La categoria con id ${categoriaId} esta  inactiva`
             })
         }
 
         // Validacion 4 verificar que el nombre no exista una subcategoria con el mismos nombre
-        const subcategoriaExistente = await Subcategoria.findOne({where: nombre, categoriaId});
+        const subcategoriaExistente = await Subcategoria.findOne({where: {nombre, categoriaId}});
         if (subcategoriaExistente){
             return res.status(400).json({
                 success:false,
@@ -191,7 +190,7 @@ const crearSubcategoria = async (req, res) =>{
         });
 
         //obtener subcategoria  de los datos de la categoria
-        const subcategoriaConCategoria = await Subcategoria.findByPk(nuevaSubCategoria.id,{
+        const subcategoriaConCategoria = await Subcategoria.findByPk(nuevaSubcategoria.id,{
             include:{
                 model: Categoria,
                 as: 'categoria',
@@ -443,13 +442,13 @@ const getEstadisticaSubcategoria = async (req, res) => {
         const {id} = req.params;
 
         //verificar que la subcategoria exista
-        const subcategoria = await Subcategoria.findByPk(id[{
+        const subcategoria = await Subcategoria.findByPk(id, {
             include:[{
                 model: Categoria,
                 as: 'categoria',
                 attributes: ['id','nombre']
             }]
-        }]);
+        });
 
         if (!subcategoria) {
             return res.status(404).json({

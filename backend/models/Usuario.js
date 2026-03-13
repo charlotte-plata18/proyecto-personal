@@ -12,7 +12,6 @@ const bcrypt = require('bcrypt');
 
 //importae instancia de sequelize
 const { sequelize } = require('../config/database');
-const { before } = require('node:test');
 
 
  /**

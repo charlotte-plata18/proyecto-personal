@@ -24,13 +24,13 @@ const {generateToken} = require ('../config/jwt');
 
 const register  = async (req, res) => {
     try {
-        const {nombre,apellido,email, password, telefono, direccion }= req.query;
+        const {nombre,apellido,email, password, telefono, direccion }= req.body;
 
 
         //Validacion1 verificar que todos los campos requerido esten presentes
         if(!nombre  || !apellido || !email || !password){
             return res.status(400).json({
-                seccess: false,
+                success: false,
                 message: 'faltan campos requeridos: nombre, apellido, email y password son obligatorios'
             });
         }
@@ -38,7 +38,7 @@ const register  = async (req, res) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // estructura de un codigo
         if(!emailRegex.test(email)){
             return res.status(400).json({
-                seccess:false,
+                success:false,
                 message: 'formato no valido'
             });
         }
@@ -46,7 +46,7 @@ const register  = async (req, res) => {
         // validacion 3 verificar la longitud de la contraseña
         if(password.length < 6){
             return res.status(400).json({
-                seccess:false,
+                success:false,
                 message: 'la contraseña debe tener al menos 6 caracteres'
             })
         }
@@ -55,8 +55,8 @@ const register  = async (req, res) => {
     const usuarioExistente = await Usuario.findOne({ where:{email}}); // findOne = significa consulta especifica
     if(usuarioExistente){
         return res.status(400).json({
-            seccess:false,
-            messasge: 'email ya esta registrado'
+            success:false,
+            message: 'email ya esta registrado'
         })
     }
 
@@ -75,15 +75,14 @@ const register  = async (req, res) => {
             apellido,
             email,
             password,
-            rol,
             telefono: telefono || null,
             direccion: direccion || null, // si no se proporciona se establece como null
-            rol: ' cliente '
+            rol: 'cliente'
         });
 
         // generarl el token JWT con datos del usuario
-        const token = generarToken({
-            id:nuevoUsuario.Id,
+        const token = generateToken({
+            id:nuevoUsuario.id,
             email:nuevoUsuario.email,
             rol:nuevoUsuario.rol
         });
@@ -92,7 +91,7 @@ const register  = async (req, res) => {
         const usuarioRespuesta = nuevoUsuario.toJSON();
         delete usuarioRespuesta.password // elimina el campo de contraseña
         res.status(201).json({
-            seccesss:true,
+            success:true,
             message: ' Usuario registrado exitosamente',
             data:{
                 usuario:usuarioRespuesta,
@@ -103,7 +102,7 @@ const register  = async (req, res) => {
     } catch (error){
         console.error('Error en crearUsuario', error);
         return res.status(500).json({
-            seccesss: false,
+            success: false,
             message:'Error de validacion',
             errors: error.message
         
@@ -127,7 +126,7 @@ const login = async (req, res) => {
         //validacion 1; varificar la contraseña que se proporciona email y password
         if(!email || !password){
             return res.status(400).json({
-                seccesss: false,
+                success: false,
                 message: ' email y contraseña son requeridos'
             })
         }
@@ -140,12 +139,12 @@ const login = async (req, res) => {
 
         if(!usuario) {
             return res.status(401).json({
-                seccess: false,
+                success: false,
                 message: 'creenciales invalidas'
             });
         }
         // Validacion3 verificar que el usuario esta activo 
-        if(!usuario,activo){
+        if(!usuario.activo){
             return res.status(401).json({
                 success:false,
                 message:'Usuario inactivo, contacte al administrador'
@@ -187,7 +186,7 @@ const login = async (req, res) => {
     }catch(error){
         console.error('error en login', error)
         res.status(500).json({
-            seccesss:false,
+            success:false,
             message:'Error al iniciar usuario',
             error: error.message
 
@@ -252,7 +251,7 @@ const updateMe = async (req, res) =>{
         
         if(!usuario) {
             return res.status(404).json({
-                seccesss : false,
+                successs : false,
                 message: 'Usuario no encontrada',
             })
         }
@@ -268,7 +267,7 @@ const updateMe = async (req, res) =>{
 
         // respuesta exitosa
         res.json({
-            seccesss: true,
+            successs: true,
             message: 'perfilactualizada exitosamente',
             data:{
                 usuarios: usuario.toJSON()
@@ -278,7 +277,7 @@ const updateMe = async (req, res) =>{
          }catch (error){
             console.error('Error en updateMe:', error);
             return res.status(500).json({
-                seccesss:false,
+                successs:false,
                 message: 'Error al actulizar perfil',
                 errors: error.message
             });
@@ -305,7 +304,7 @@ const updateMe = async (req, res) =>{
             }
 
             //validacion 2 
-            if(!passwordActual.legth < 6){
+            if(!passwordActual.length < 6){
                 return res.status(400).json({
                     success: false,
                     message: 're queriere contraseña actual debe tener al menos 6 caracteres'
@@ -313,7 +312,7 @@ const updateMe = async (req, res) =>{
             };
 
             // validacion 3 buscar que el usuario con password incluido 
-            const usuario = await Usuario.scope(`withpassword`).findByPk(req.usuario.id);
+            const usuario = await Usuario.scope('withPassword').findByPk(req.usuario.id);
             if(!usuario){
                 return res.status(400).json({
                     success: false,

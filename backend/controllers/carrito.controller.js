@@ -23,12 +23,12 @@ const Subcategoria = require('../models/Subcategoria');
         try{
             //obtener items del carrito de los productos relacionados
             const itemsCarrito = await Carrito.findAll({ 
-                where: { usuarioId: req.usuario._id },
+                where: { usuarioId: req.usuario.id },
             include: [
                 {
                     model: Producto,
                     as: 'producto',
-                    attributes: ['Id', 'nombre', 'descripcion', 'precio', 'stock', 'imagen', 'activo'],
+                    attributes: ['id', 'nombre', 'descripcion', 'precio', 'stock', 'imagen', 'activo'],
                     include: [
                         {
                             model: Categoria,
@@ -55,8 +55,8 @@ const Subcategoria = require('../models/Subcategoria');
         });
 
         //respuesta exitosa
-        req.json ({
-            succes: true,
+        res.json ({
+            success: true,
             data: {
                 items : itemsCarrito,
                 resume: {
@@ -70,7 +70,7 @@ const Subcategoria = require('../models/Subcategoria');
     } catch (error) {
         console.error ('Error en getCarrito', error);
         res.status(500).json({
-            succes: false,
+            success: false,
             message: 'Error al obtener carrito',
             error: error.message
         })

@@ -45,7 +45,7 @@ const getUsuarios   = async (req, res) => {
         const offset = (parseInt(pagina) - 1) * parseInt(limite);
 
         //obtener usuarios sin password
-        const {count, row:usuarios} = await Usuario.findAndCountAll({
+        const {count, rows:usuarios} = await Usuario.findAndCountAll({
             where,
             attributes: {exclude: ['password']},
             limit:parseInt(limite),
@@ -67,11 +67,11 @@ const getUsuarios   = async (req, res) => {
             }
         })
     }catch (error){
-        console.error('Error en getUsuarios:', error),
+        console.error('Error en getUsuarios:', error);
         res.status(500).json({
             success:false,
             message: 'Error en al obtener el usuario',
-            error: message.error
+            error: error.message
         })
     }
 }
@@ -88,7 +88,7 @@ const getUsuarioById = async (req, res) => {
         const {id}= req.params;
         
         // Buscar usuarios con subusuario y contar productos
-        const usuario = await usuario.findByPk (id,{
+        const usuario = await Usuario.findByPk (id,{
             attributes:{exclude: ['password']}
         });
         
@@ -137,7 +137,7 @@ const crearUsuario = async (req, res) =>{
             });
         }
         //validar rol
-        if (!['cliente', 'auxiliar', 'administradores'].includes(rol)){
+        if (!['cliente', 'auxiliar', 'administrador'].includes(rol)){
             return res.status(400).json({
                 success: false,
                 message: 'Rol invalido debe ser cliente, auxiliar o administrador'
@@ -169,7 +169,7 @@ const crearUsuario = async (req, res) =>{
             success:true,
             message: ' Usuario creado exitosamente',
             data:{
-                usuario:nuevoUsuario.tojson() // convertir en Json para excluir campos sensibles y es el formato para las api rest
+                usuario:nuevoUsuario.toJSON() // convertir en Json para excluir campos sensibles y es el formato para las api rest
             }
         });
 
@@ -269,7 +269,7 @@ const toggleUsuario = async (req, res) => {
         const {id} =req.params;
 
         // Buscar usuario
-        const usuario = await Usuario.findByPk(Id);
+        const usuario = await Usuario.findByPk(id);
 
         if(!usuario) {
             return res.status(404).json ({
@@ -293,7 +293,7 @@ const toggleUsuario = async (req, res) => {
         res.json({
             success: true,
             message: `Usuario ${usuario.activo ? 'activado': 'desactivado'} exitosamente`,
-            date:{
+            data:{
                 usuario: usuario.toJSON()
             }
         });
@@ -364,8 +364,8 @@ const getEstadisticaUsuarios = async (req, res) => {
     try {
         //datos de ususario
         const totalUsuarios = await Usuario.count();
-        const totalClientes = await Usuario.count({where:{rol: 'cleinte'}});
-        const totalAdmins = await Usuario.count({where: {ro:'adiministrador'}});
+        const totalClientes = await Usuario.count({where:{rol: 'cliente'}});
+        const totalAdmins = await Usuario.count({where: {rol:'administrador'}});
         const usuariosActivos= await Usuario.count({where:{activo: true}});
         const usuariosInactivo = await Usuario.count({where: { activo: false}});
 

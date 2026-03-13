@@ -203,7 +203,6 @@ const crearProducto = async (req, res) =>{ // req = recoje la informacion y res 
         //valoracion 2 verificar si si la categoria existe y esta activa
         const categoria = await Categoria.findByPk(categoriaId);
         if (!categoria) {
-        if(!categoria) {
             return res.status(400).json({
                 success:false,
                 message: `La categoria con id ${categoriaId} no existe`
@@ -287,8 +286,7 @@ const crearProducto = async (req, res) =>{ // req = recoje la informacion y res 
             }
         });
 
-    } 
-    }catch (error){
+    } catch (error){
         console.error('Error en crearProducto:', error);
 
         // si hubo un error eliminar imagen si se subio una imagen
@@ -369,7 +367,7 @@ const actualizaProducto = async (req, res) =>{
             }
 
             const catId = await categoriaId||producto.categoriaId;
-            if (!subcategoria.categoriaId !== parseInt(catId)) {
+            if (subcategoria.categoriaId !== parseInt(catId)) {
                 return res.status(400).json({
                     success:false,
                     message:`la subcategoria mo pertenece a la categoria seleccionada`,

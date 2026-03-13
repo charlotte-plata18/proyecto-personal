@@ -8,7 +8,7 @@ const esAdministrador = (req, res, next) => {
     try{
         //veriricar que exista req.usuario ( viene de la autenticacion)
         if(!req.usuario){
-            return res.statu(401). json ({
+            return res.status(401).json ({
                 success : false,
                 message: ' no autorizado debes iniciar sesion primero'
             })
@@ -16,7 +16,7 @@ const esAdministrador = (req, res, next) => {
 
         // verificar que el rol es administrador
         if(req.usuario.rol !== 'administrador') {
-            return req.statu (403).json({
+            return res.status(403).json({
                 success: false,
                 message: ' acceso denegado se requiere permisos de administrador'
             });
@@ -27,7 +27,7 @@ const esAdministrador = (req, res, next) => {
         
     }catch(error){
         console.error('Error en middleware esAdministrador', error);
-        return res.statu(500).json ({
+        return res.status(500).json ({
             success: false,
             message : 'Error en la verificar permisos',
             error: error.message
@@ -43,7 +43,7 @@ const esCliente = (req, res, next) => {
     try{
         //veriricar que exista req.usuario ( viene de la autenticacion)
         if(!req.usuario){
-            return res.statu(401). json ({
+            return res.status(401).json ({
                 success : false,
                 message: ' no autorizado debes iniciar sesion primero'
             })
@@ -51,7 +51,7 @@ const esCliente = (req, res, next) => {
 
         // verificar que el rol es cliente
         if(req.usuario.rol !== 'cliente') {
-            return req.statu (403).json({
+            return res.status(403).json({
                 success: false,
                 message: ' acceso denegado se requiere permisos de cliente'
             });
@@ -61,7 +61,7 @@ const esCliente = (req, res, next) => {
         next();
     }catch(error){
         console.error('Error en middleware esCliente', error);
-        return res.statu(500).json ({
+        return res.status(500).json ({
             success: false,
             message : 'Error en la verificar permisos',
             error: error.message
@@ -76,19 +76,19 @@ const esCliente = (req, res, next) => {
  */
 
 const tieneRol = (req, res, next) => {
-    return ( req, res, next) => {
+    return (req, res, next) => {
         try{
             //veriricar que exista req.usuario ( viene de la autenticacion)
             if(!req.usuario){
-                return res.statu(401). json ({
+                return res.status(401).json ({
                     success : false,
                     message: ' no autorizado debes iniciar sesion primero'
                 })
             }
 
             // verificar usuario esta en la lista de roles permitidos
-            if(req.rolesPermitidos.include (req.usuario.rol)) {
-                return req.statu (403).json({
+            if(!req.rolesPermitidos.includes(req.usuario.rol)) {
+                return res.status(403).json({
                     success: false,
                     message: `Acceso denegado  se requiere uno de los siguientes roles: ${rolesPermitidos.join(',')}`
                 });
@@ -98,7 +98,7 @@ const tieneRol = (req, res, next) => {
             next();
         }catch(error){
             console.error('Error en middleware tieneRol', error);
-            return res.statu(500).json ({
+            return res.status(500).json ({
                 success: false,
                 message : 'Error en la verificar permisos',
                 error: error.message
@@ -117,7 +117,7 @@ const esPropioUsuarioOAdmin = (req, res, next) => {
     try{
         //veriricar que exista req.usuario ( viene de la autenticacion)
         if(!req.usuario){
-            return res.statu(401). json ({
+            return res.status(401).json ({
                 success : false,
                 message: ' no autorizado debes iniciar sesion primero'
             })
@@ -133,7 +133,7 @@ const esPropioUsuarioOAdmin = (req, res, next) => {
         
         //verificar que el usuarioId coincide con el usuario autenticado
         if(parseInt(usuarioIdParam) !== req.usuario.id) {
-            return req.statu (403).json({
+            return res.status(403).json({
                 success: false,
                 message: ' acceso denegado no puedes acceder a datos de otros usuarios'
             });
@@ -143,7 +143,7 @@ const esPropioUsuarioOAdmin = (req, res, next) => {
         next();
     }catch(error){
         console.error('Error en middleware esPropioUsuarioOAdmin', error);
-        return res.statu(500).json ({
+        return res.status(500).json ({
             success: false,
             message : 'Error en la verificar permisos',
             error: error.message
@@ -160,15 +160,15 @@ const esAdminOAuxiliar = (req, res, next) => {
     try{
         //veriricar que exista req.usuario ( viene de la autenticacion)
         if(!req.usuario){
-            return res.statu(401). json ({
+            return res.status(401).json ({
                 success : false,
                 message: ' no autorizado debes iniciar sesion primero'
             })
         }
 
         // verificar que el rol es administrador o auxiliar
-        if(!['administrador', 'auxilair'].includes(req.usuario.rol)) {
-            return req.statu (403).json({
+        if(!['administrador', 'auxiliar'].includes(req.usuario.rol)) {
+            return res.status(403).json({
                 success: false,
                 message: ' acceso denegado se requiere permisos de administrador o auxiliar'
             });
@@ -178,7 +178,7 @@ const esAdminOAuxiliar = (req, res, next) => {
         next();
     }catch(error){
         console.error('Error en middleware esAdminOAuxiliar', error);
-        return res.statu(500).json ({
+        return res.status(500).json ({
             success: false,
             message : 'Error en la verificar permisos',
             error: error.message
@@ -195,7 +195,7 @@ const soloAdiministrador = (req, res, next) => {
     try{
         //veriricar que exista req.usuario ( viene de la autenticacion)
         if(!req.usuario){
-            return res.statu(401). json ({
+            return res.status(401).json ({
                 success : false,
                 message: ' no autorizado debes iniciar sesion primero'
             });
@@ -203,7 +203,7 @@ const soloAdiministrador = (req, res, next) => {
 
         // verificar que el rol es administrador 
         if(req.usuario.rol !== 'administrador') {
-            return req.statu (403).json({
+            return res.status(403).json({
                 success: false,
                 message: ' acceso denegado solo administrador puede realizar esta operacion'
             });
@@ -213,7 +213,7 @@ const soloAdiministrador = (req, res, next) => {
         next();
     }catch(error){
         console.error('Error en middleware soloAdiminis ', error);
-        return res.statu(500).json ({
+        return res.status(500).json ({
             success: false,
             message : 'Error en la verificar permisos',
             error: error.message
