@@ -11,7 +11,6 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 const { table, error } = require('console');
 const { type } = require('os');
-const Categoria = require('./Categoria');
 
  /**
   * Definir el modelo de la producto
@@ -166,38 +165,35 @@ const Producto = sequelize.define('Producto', {
          * valida que la subcategoria y que la categoria padre esten activas
 
          */
-        beforeCreate: async (producto) =>{
-            const Categoria = require ('./Categoria');
-            const Subcategoria = require ('./Subcategoria');
+        beforeCreate: async (producto) => {
+            const { Categoria, Subcategoria } = sequelize.models;
 
             // Buscar subcategoria padre
-            const subcategoria = await Subcategoria.findByPk (producto.subcategoriaId);
+            const subcategoria = await Subcategoria.findByPk(producto.subcategoriaId);
 
             if (!subcategoria) {
-                throw  new Error ( 'La subcategoria seleccionada no existe');
+                throw new Error('La subcategoria seleccionada no existe');
             }
 
             if (!subcategoria.activo) {
-                throw new Error ('No se puede crear una producto en una subcategoria inactiva')
+                throw new Error('No se puede crear una producto en una subcategoria inactiva');
             }
 
-         // Buscar categoria padre
-            const categoria = await Categoria.findByPk (producto.categoriaId);
+            // Buscar categoria padre
+            const categoria = await Categoria.findByPk(producto.categoriaId);
 
             if (!categoria) {
-                throw  new Error ( 'La categoria seleccionada noo existe');
+                throw new Error('La categoria seleccionada noo existe');
             }
 
             if (!categoria.activo) {
-                throw new Error ('No se puede crear una producto  en una categoria inactiva')
+                throw new Error('No se puede crear una producto  en una categoria inactiva');
             }
 
-
-        //validar que la sudcategoria pertenezca a una categoria
+            // validar que la subcategoria pertenezca a una categoria
             if (subcategoria.categoriaId !== producto.categoriaId) {
-            throw new Error("La subcategoria no pertenece a la categoria seleccionada");
+                throw new Error('La subcategoria no pertenece a la categoria seleccionada');
             }
-            
         },
 
         /**

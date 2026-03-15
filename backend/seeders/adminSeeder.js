@@ -35,7 +35,7 @@ const runSeeders = async () => {
     console.log('\n✅ Seeders ejecutados correctamente\n');
     
   } catch (error) {
-    console.error('\n❌ Error al ejecutar seeders:', error.message);
+    console.error('\n❌ Error al ejecutar seeders:', error);
     throw error;
   }
 };

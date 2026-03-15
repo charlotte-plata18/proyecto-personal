@@ -149,31 +149,6 @@ const Pedido = sequelize.define('Pedido', {
 
     hooks:{
         /**
-         * beforeCreate - se ejecuta antes de crear una subcategoria
-         * valida qu este activo
-         */
-        /**beforeCreate: async (itemCarrito) =>{
-            const Producto = require ('./Producto');
-
-            // Buscar producto
-            const producto = await Producto.findByPk (itemCarrito.productoId);
-
-            if (!producto) {
-                throw  new Error ( 'El producto  no existe');
-            }
-            if (!producto.activo) {
-                throw new Error ('No se puede crear un item de carrito para un producto inactivo')
-            }
-            if (!producto.haystock (itemCarrito.cantidad)) {
-                throw new Error (`Stock insuficiente, solo hay ${producto.stock} unidades disponibles`)
-            }
-
-            // Guardar el precio actual del producto
-
-            itemCarrito.precioUnitario = producto.precio;
-        },
-
-        /**
          * afterUpdate - se ejecuta antes de actulizar un pedido
          * actualiza las fechas segun el estado del pedido
          */

@@ -92,7 +92,7 @@ const agregarAlCarrito = async (req, res) =>{
         //Validacion 1: campos requeridos
         if(!productoId) {
             return res.status(400).json({
-                succes:false,
+                success:false,
                 message: 'El productoId es requerido'
             });
         }
@@ -101,7 +101,7 @@ const agregarAlCarrito = async (req, res) =>{
         const cantidadNum = parseInt (cantidad);
         if (cantidadNum < 1) {
             return res.status (400).json({
-                succes: false,
+                success: false,
                 message: 'La cantidad debe ser menos 1'
             });
         }
@@ -111,14 +111,14 @@ const agregarAlCarrito = async (req, res) =>{
 
         if(!producto) {
             return res.status(404).json({
-                succes:false,
+                success:false,
                 message: 'Producto no encontrado'
             });
         }
 
         if (!producto.activo) {
             return res.status(400).json({
-                succes:false,
+                success:false,
                 message: 'El producto no est disponible'
             });
         }
@@ -138,7 +138,7 @@ const agregarAlCarrito = async (req, res) =>{
             // Validar stock disponible
             if (nuevaCantidad > producto.stock) {
                 return res.status(400).json ({
-                    succes: false,
+                    success: false,
                     message: `Stock insuficiente disponible: ${producto.stock}, en carrito: ${itemExistente.cantidad}`
                 })
             }
@@ -156,7 +156,7 @@ const agregarAlCarrito = async (req, res) =>{
             });
 
             return res.json ({
-                succes: true,
+                success: true,
                 message:` Cantidad actualizada en el carrito`,
                 data: { 
                     item: itemExistente}
@@ -167,7 +167,7 @@ const agregarAlCarrito = async (req, res) =>{
         // validacion 5: stock disponible
         if (cantidadNum > producto.stock) {
             return res.status(400).json({
-                succes: false,
+                success: false,
                 message: `Stock insuficiente, Disponiblr ${producto.stock}`
             });
         }
@@ -192,7 +192,7 @@ const agregarAlCarrito = async (req, res) =>{
 
         // respuesta exitosa
         res.status(201).json({
-            succes: true,
+            success: true,
             message: 'Producto agreado al carrito',
             data: {
                 item: nuevoItem
@@ -203,7 +203,7 @@ const agregarAlCarrito = async (req, res) =>{
     } catch (error){
         console.error ('Error en agregarAlCarrito', error);
         res.status(500).json ({
-            succes: false,
+            success: false,
             message: 'Error al agregar producto al carrito',
             error: error.message
         });

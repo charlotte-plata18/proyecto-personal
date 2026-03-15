@@ -44,7 +44,7 @@ const Subcategoria = sequelize.define('Subcategoria', {
     /**
      * Descripcion de la subcategoria 
      */
-    desripcion: {
+    descripcion: {
         type: DataTypes.TEXT,
         allowNull: true,
     },
@@ -116,14 +116,14 @@ const Subcategoria = sequelize.define('Subcategoria', {
             const Categoria = require ('./Categoria');
 
             // Buscar categoria padre
-            const categoria = await Categoria.findByPk (subcategoria.categoriaId);
+            const categoria = await Categoria.findByPk(subcategoria.categoriaId);
 
             if (!categoria) {
-                throw  new Error ( 'La categoria seleccionada noo existe');
+                throw new Error('La categoria seleccionada noo existe');
             }
 
             if (!categoria.activo) {
-                throw new Error ('No se puede crear una subcategoria  en una categoria inactiva')
+                throw new Error('No se puede crear una subcategoria  en una categoria inactiva');
             }
         },
 
@@ -143,24 +143,22 @@ const Subcategoria = sequelize.define('Subcategoria', {
                 const Producto = require('./Producto');
 
                 try {
-                    //Paso 1 desactivar las subcategoria de esta categoria
-                    const producto= await Producto.findAll({
-                        where:{subcategoriaId: subcategoria.id}
+                    //Paso 1 desactivar las productos de esta subcategoria
+                    const productos = await Producto.findAll({
+                        where: { subcategoriaId: subcategoria.id }
                     });
 
-                    for (const producto of productos){
-                        await producto.update({activo:false
-                        }, {transaction:options.transaction}),
+                    for (const producto of productos) {
+                        await producto.update({ activo: false }, { transaction: options.transaction });
                         console.log(`Producto desactivadas: ${producto.nombre}`);
-                    };
-                    console.log ('Subcategoria y productos relacionados correctamente');
-                } catch(error) {
+                    }
+                    console.log('Subcategoria y productos relacionados correctamente');
+                } catch (error) {
                     console.error(
                         `Error al desactivar productos a la subcategoria:`,
                         error.message,
                     );
-                    throw error; 
-                    
+                    throw error;
                 }
 
 

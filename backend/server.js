@@ -175,9 +175,12 @@ const starServer = async () =>{
             initAssociations();
          
         // en desarrollo alter puede ser true para actualizar la estructura
+        // en pruebas forzar la recreación para mantener el esquema actualizado
+        // (Jest establece JEST_WORKER_ID, y a veces NODE_ENV viene de .env)
         // en produccion debe ser false para no perder los datos
+        const forceSync = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
         const alterTables = process.env.NODE_ENV === 'development';
-        const dbSynced = await syncDatabase(false,alterTables);
+        const dbSynced = await syncDatabase(forceSync, alterTables);
 
         if(!dbSynced){
             console.error('X error al sincronizar la base de datos');
@@ -187,15 +190,17 @@ const starServer = async () =>{
         // paso 3 ejecutar seeders datos iniciales
         await runSeeders();
 
-        //paso 4 iniciar el servidor express
-        app.listen(PORT,() => {
-            console.log('\n ___________________________');
-            console.log(`Servidor corriendo en el puerto ${PORT}`);
-            console.log(`URL: http://localhost:${PORT}`);
-            console.log(`base datos ${process.env.DB_NAME}`);
-            console.log(`Modo: ${process.env.NODE_ENV}`);
-            console.log(`Servidor listo para peticiones`)
-        });
+        //paso 4 iniciar el servidor express (no en tests)
+        if (process.env.NODE_ENV !== 'test' && process.env.JEST_WORKER_ID === undefined) {
+            app.listen(PORT,() => {
+                console.log('\n ___________________________');
+                console.log(`Servidor corriendo en el puerto ${PORT}`);
+                console.log(`URL: http://localhost:${PORT}`);
+                console.log(`base datos ${process.env.DB_NAME}`);
+                console.log(`Modo: ${process.env.NODE_ENV}`);
+                console.log(`Servidor listo para peticiones`)
+            });
+        }
 
     }catch (error){
         console.error('X Error fatal al inicar el sercidor:', error.message);
@@ -217,8 +222,8 @@ process.on('unhandledRejection', (err) =>{
     process.exit(1);
 });
 
-//iniciar el servidor
-starServer();
+// iniciar el servidor y sincronizar la base de datos (en tests no se levanta el listener)
+app.ready = starServer();
 
 // exportar el app para testing
 module.exports = app;

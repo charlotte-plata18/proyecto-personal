@@ -133,7 +133,7 @@ const Carrito = sequelize.define('Carrito', {
             if (!producto.activo) {
                 throw new Error ('No se puede crear un item de carrito para un producto inactivo')
             }
-            if (!producto.haystock (itemCarrito.cantidad)) {
+            if (!producto.hayStock(itemCarrito.cantidad)) {
                 throw new Error (`Stock insuficiente, solo hay ${producto.stock} unidades disponibles`)
             }
 
@@ -158,7 +158,7 @@ const Carrito = sequelize.define('Carrito', {
                     throw new Error('El producto no existe');
                 }
 
-                if (!producto.haystock (itemCarrito.cantidad)) {
+                if (!producto.hayStock(itemCarrito.cantidad)) {
                     throw new Error (`Stock insuficiente, 
                     solo hay ${producto.stock} unidades
                     disponibles`);
@@ -189,7 +189,7 @@ Carrito.prototype.actualizarCatidad = async function (nuevaCantidad) {
 
     const producto = await Producto.findByPk(this.productoId);
 
-    if(!producto.haystock(nuevaCantidad)) {
+    if(!producto.hayStock(nuevaCantidad)) {
         throw new Error(`Stock insuficiente, solo hay ${producto.stock} unidades disponibles`);
     }
 

@@ -330,6 +330,7 @@ const actualizaProducto = async (req, res) =>{
             nombre, 
             descripcion,
             categoriaId,
+            subcategoriaId,
             activo,
             stock,
             precio
@@ -345,8 +346,7 @@ const actualizaProducto = async (req, res) =>{
             });
         }
         
-        // validacion si se cambia la categoria y sub categoria
-
+        // validacion si se cambia la categoria
         if (categoriaId && categoriaId !== producto.categoriaId) {
             const categoria = await Categoria.findByPk(categoriaId);
             if (!categoria ||!categoria.activo) {
@@ -357,6 +357,7 @@ const actualizaProducto = async (req, res) =>{
             }
         }
 
+        // validacion si se cambia la subcategoria
         if (subcategoriaId && subcategoriaId !== producto.subcategoriaId) {
             const subcategoria = await Subcategoria.findByPk(subcategoriaId);
             if (!subcategoria ||!subcategoria.activo) {
@@ -413,10 +414,11 @@ const actualizaProducto = async (req, res) =>{
         if (nombre!==undefined) producto.nombre = nombre;
         if (descripcion!==undefined) producto.descripcion = descripcion;
         if (categoriaId!==undefined) producto.categoriaId =  parseInt(categoriaId);
+        if (subcategoriaId!==undefined) producto.subcategoriaId = parseInt(subcategoriaId);
         if (activo!==undefined) producto.activo = activo;
         if (stock!==undefined) producto.stock = parseInt(stock);
         if (precio!==undefined) producto.precio = parseFloat(precio);
-        if (subcategoriaId!==undefined) producto.subcategoriaId = parseInt(subcategoriaId);
+        
         // guardar cambios
         await producto.save();
 

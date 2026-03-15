@@ -23,7 +23,7 @@ const crearPedido = async (req, res) => {
     const t = await sequelize.transaction();
 
     try {
-        const { direccionEnvio, telefono, metodoPago = 'efectivo',notasAdicionales} = req.body;
+        const { direccionEnvio, telefono, metodoPago = 'efectivo', notas} = req.body;
 
         //Validacion 1: Direccion requerida
         if(!direccionEnvio || direccionEnvio.trim() === '') {
@@ -112,11 +112,11 @@ const crearPedido = async (req, res) => {
         const pedido = await Pedido.create({
             usuarioId: req.usuario.id,
             total: totalPedido,
-            estado: 'Pediente',
+            estado: 'pendiente',
             direccionEnvio,
             telefono,
             metodoPago,
-            notasAdicionales
+            notasAdicionales: notas
         }, {transaction: t});
 
         //Crear  detalles del pedido y actualizar stock
@@ -128,7 +128,7 @@ const crearPedido = async (req, res) => {
             //Crar detalle
             const detalle = await DetallePedido.create({
                 pedidoId: pedido.id,
-                productoID: producto.id,
+                productoId: producto.id,
                 cantidad: item.cantidad,
                 precioUnitario: item.precioUnitario,
                 subtotal: parseFloat(item.precioUnitario) * item.cantidad
@@ -143,7 +143,7 @@ const crearPedido = async (req, res) => {
 
         //vaciar carrito
         await Carrito.destroy({
-            where : {usuarioId: req.usuario. id},
+            where : {usuarioId: req.usuario.id},
             transaction: t
         });
 
@@ -163,8 +163,8 @@ const crearPedido = async (req, res) => {
                     as :'detalles',
                     include:[{
                         model: Producto,
-                        as: ' producto',
-                        attributes: [' id', 'nombre', 'precio','imagen']
+                        as: 'producto',
+                        attributes: ['id', 'nombre', 'precio','imagen']
                     }]
                 }
             ]
@@ -229,7 +229,7 @@ const getMisPedidos = async (req, res ) =>{
         });
 
         //respuesta exitosa
-        res.status(201).json({
+        res.status(200).json({
             success: true,
             data: {
                 pedidos,
@@ -275,7 +275,7 @@ const getPedidoById = async (req, res) =>{
                 {
                     model: Usuario,
                     as: 'usuario',
-                    attributes: [' id',' nombre',' email']
+                    attributes: ['id', 'nombre', 'email']
                 },
                 {
                     model: DetallePedido,

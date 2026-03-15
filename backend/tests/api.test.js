@@ -22,9 +22,40 @@ describe('🧪 TESTS DE API E-COMMERCE', () => {
 
   // Limpiar usuario de prueba antes de empezar
   beforeAll(async () => {
+    console.log('[beforeAll] Starting...');
+    // Esperar a que la base de datos esté lista y seeded
+    if (app.ready) {
+      console.log('[beforeAll] Waiting for app.ready...');
+      await app.ready;
+      console.log('[beforeAll] app.ready resolved');
+    }
     const { Usuario } = require('../models');
+    
+    // Esperar a que el usuario admin exista (confirmación de que seeder terminó)
+    let adminFound = false;
+    let attempts = 0;
+    console.log('[beforeAll] Checking for admin user...');
+    while (!adminFound && attempts < 50) {
+      try {
+        const admin = await Usuario.findOne({ where: { email: 'admin@ecommerce.com' } });
+        if (admin) {
+          console.log('[beforeAll] Admin user found!');
+          adminFound = true;
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+      } catch (err) {
+        console.error('[beforeAll] Error:', err.message);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+    }
+    
+    console.log('[beforeAll] Admin found:', adminFound, 'Attempts:', attempts);
+    // Limpiar usuario de prueba
     await Usuario.destroy({ where: { email: 'test@test.com' } });
-  });
+  }, 60000);
 
   // ==========================================
   // 1. TESTS DE AUTENTICACIÓN
@@ -56,6 +87,11 @@ describe('🧪 TESTS DE API E-COMMERCE', () => {
           email: 'admin@ecommerce.com',
           password: 'admin1234'
         });
+      
+      console.error('Login admin response:', {
+        status: response.status,
+        body: response.body
+      });
       
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('data');

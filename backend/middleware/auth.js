@@ -67,6 +67,7 @@ const verificarAuth = async (req, res, next) => {
         }
         //paso 5 agregar el usuario al objeto req para uso posterior 
         // ahora en los controladores podemos acceder a req.usuario
+        req.usuario = usuario;
         // continuar en el siguiente 
         next();
 

@@ -200,7 +200,7 @@ const crearCategoria = async (req, res) =>{
 const actualizaCategoria = async (req, res) =>{
     try{
         const{id} = req.params;
-        const {nombre, descripcion} =req.body;
+        const {nombre, descripcion, activo} =req.body;
 
         //buscar categoria
         const categoria = await Categoria.findByPk(id);

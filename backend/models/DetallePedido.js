@@ -36,7 +36,7 @@ const DetallePedido = sequelize.define('DetallePedido', {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE', //si se elimina el pedido se eliminan los detalles asociados
         validate:{
-            notEmpay:{
+            notEmpty: {
                 msg: 'Debe especificar el ID del pedido del detalle del pedido'
             }
         }
@@ -133,11 +133,13 @@ const DetallePedido = sequelize.define('DetallePedido', {
     hooks: {
         /**
          * beforeCreate - se ejecuta antes de crear un detalle de pedido
+         * valida que el producto exista, este activo y tenga stock disponible
          * calcula el subtotal automaticamente 
          */
         beforeCreate:(detalle) =>{
             //calcular subtotal precio * cantidad
-            detalle.subtotal = parseFloat(detalle.precioUnitario) * detalle.cantidad;
+            detalle.subtotal = 
+            parseFloat(detalle.precioUnitario) * detalle.cantidad;
         },
 
         /**
@@ -177,7 +179,7 @@ DetallePedido.prototype.actualizarCatidad = async function (nuevaCantidad) {
 
     const producto = await Producto.findByPk(this.productoId);
 
-    if(!producto.haystock(nuevaCantidad)) {
+    if(!producto.hayStock(nuevaCantidad)) {
         throw new Error(`Stock insuficiente, solo hay ${producto.stock} unidades disponibles`);
     }
 

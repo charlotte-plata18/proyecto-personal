@@ -87,25 +87,24 @@ const pedidoController = require ('../controllers/pedido.controller');
   */
 
  // getUsuarios - Obtener todos los usuarios
- router.get ('/usuario', usuarioController.getUsuarios);
+ router.get ('/usuarios', usuarioController.getUsuarios);
 
  // getUsuarioById - Obtener usuario por ID
- router.get('/usuario/:id', usuarioController.getUsuarioById);
+ router.get('/usuarios/:id', usuarioController.getUsuarioById);
 
  // crearUsuario - Crear nuevo usuario
- router.post ('/usuario', soloAdiministrador, usuarioController.crearUsuario);
+ router.post ('/usuarios', soloAdiministrador, usuarioController.crearUsuario);
 
  // actualizaUsuario - Actualizar usuario
- router.put ('/usuario/:id', usuarioController.actualizaUsuario);
-
+ router.put ('/usuarios/:id', soloAdiministrador, usuarioController.actualizaUsuario);
  // toggleUsuario - Activar/Desactivar usuario
- router.patch ('/usuario/:id/toggle', soloAdiministrador, usuarioController.toggleUsuario);
+ router.patch ('/usuarios/:id/toggle', soloAdiministrador, usuarioController.toggleUsuario);
 
  // eliminarUsuario - Eliminar usuario
- router.delete ('/usuario/:id', soloAdiministrador, usuarioController.eliminarUsuario);
+ router.delete ('/usuarios/:id', soloAdiministrador, usuarioController.eliminarUsuario);
 
  // getEstadisticaUsuarios - Obtener estadísticas de usuarios
- router.get('/usuario/:id/stats', usuarioController.getEstadisticaUsuarios);
+ router.get('/usuarios/:id/stats', usuarioController.getEstadisticaUsuarios);
 
  /**
   * ========================================
@@ -114,10 +113,10 @@ const pedidoController = require ('../controllers/pedido.controller');
   */
 
  // getProductos - Obtener todos los productos
- router.get ('/producto', productoController.getProductos);
+ router.get ('/productos', productoController.getProductos);
 
  // getProductoById - Obtener producto por ID
- router.get('/producto/:id', productoController.getProductoById);
+ router.get('/productos/:id', productoController.getProductoById);
 
  // crearProducto - Crear nuevo producto
  router.post('/productos', productoController.crearProducto);
@@ -146,8 +145,8 @@ const pedidoController = require ('../controllers/pedido.controller');
  // getMisPedidos - Obtener mis pedidos
  router.get ('/pedidos/mios', pedidoController.getMisPedidos);
 
- // getPedidoById - Obtener pedido por ID
- router.get('/pedido/:id', pedidoController.getPedidoById);
+ // getPedidoById - Obtener pedido por ID (plural route)
+ router.get('/pedidos/:id', pedidoController.getPedidoById);
 
  // cancelarPedido - Cancelar pedido
  router.patch('/pedidos/:id/cancelar', pedidoController.cancelarPedido);

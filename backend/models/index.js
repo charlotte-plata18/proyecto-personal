@@ -52,7 +52,7 @@ Subcategoria.belongsTo(Categoria,{
 
 Categoria.hasMany(Producto,{
     foreignKey: 'categoriaId', // campo que conecta las tablas
-    as: 'producto', //Alias para relacion
+    as: 'productos', //Alias para relacion
     onDelete: 'CASCADE', // si se elimina categoria elimina producto
     onUpdate: 'CASCADE' // si se actualiza categoria actualizar el producto
 });
@@ -72,7 +72,7 @@ Producto.belongsTo(Categoria,{
 
 Subcategoria.hasMany(Producto,{
     foreignKey: 'subcategoriaId', // campo que conecta las tablas
-    as: 'producto', //Alias para relacion
+    as: 'productos', //Alias para relacion
     onDelete: 'CASCADE', // si se elimina subcategoria eliminar el producto
     onUpdate: 'CASCADE' // si se actualiza subcategoria actualizar el producto
 });
@@ -178,8 +178,8 @@ Producto.hasMany(DetallePedido,{
 });
 
 DetallePedido.belongsTo(Producto,{
-    foreignKey: 'subcategoriaId', // campo que conecta las tablas
-    as: 'subcategoria', //Alias para relacion
+    foreignKey: 'productoId', // campo que conecta las tablas
+    as: 'producto', //Alias para relacion
     onDelete: 'RESTRICT', // NO se elimina un producto si este en un detalle pedido
     onUpdate: 'CASCADE' // si se actualiza un producto actualizar detalle pedido
 });
